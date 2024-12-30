@@ -4,43 +4,60 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fanzone.adapters.PostAdapter
 import com.example.fanzone.databinding.ActivityMatchDetailsBinding
 import com.example.fanzone.viewmodel.MatchDetailsViewModel
 
 class MatchDetailsActivity : AppCompatActivity() {
-
     private val viewModel: MatchDetailsViewModel by viewModels()
     private lateinit var binding: ActivityMatchDetailsBinding
+
+    private lateinit var yourPostsAdapter: PostAdapter
+    private lateinit var popularPostsAdapter: PostAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inflate the layout using ViewBinding
+        // Initialize adapters
+        yourPostsAdapter = PostAdapter(emptyList())
+        popularPostsAdapter = PostAdapter(emptyList())
+
+        binding.yourPostsRecyclerView.adapter = yourPostsAdapter
+        binding.popularPostsRecyclerView.adapter = popularPostsAdapter
+
+
+        // Inflate layout
         binding = ActivityMatchDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Bind ViewModel data
-        viewModel.matchTitle.observe(this, Observer { binding.matchTitleTextView.text = it })
-        viewModel.matchDetails.observe(this, Observer { binding.matchDetailsTextView.text = it })
+        // Assume matchId is passed via intent extras
+        val matchId = intent.getStringExtra("matchId") ?: "1"
 
-        // RecyclerView setup
-        binding.yourPostsRecyclerView.layoutManager = LinearLayoutManager(this)
-        binding.popularPostsRecyclerView.layoutManager = LinearLayoutManager(this)
+        // Initialize ViewModel
+        viewModel.initialize(matchId)
 
+        // Observe LiveData
+        viewModel.matchDetails.observe(this, Observer { matchDetails ->
+            binding.matchTitleTextView.text = "${matchDetails.homeTeam} - ${matchDetails.awayTeam}"
+            binding.matchDetailsTextView.text = "${matchDetails.matchTime}\n${matchDetails.matchLocation}"
+            binding.matchResultTextView.text = matchDetails.result
+        })
+
+        // Observe and update your posts
         viewModel.yourPosts.observe(this, Observer { posts ->
-            // Update Your Posts RecyclerView
+            yourPostsAdapter.updateData(posts)
         })
 
+        // Observe and update popular posts
         viewModel.popularPosts.observe(this, Observer { posts ->
-            // Update Popular Posts RecyclerView
+            popularPostsAdapter.updateData(posts)
         })
 
-        // Handle comment submission
+        // Handle new post submission
         binding.sendCommentButton.setOnClickListener {
-            val newComment = binding.commentEditText.text.toString()
-            if (newComment.isNotBlank()) {
-                viewModel.addPost(newComment)
+            val content = binding.commentEditText.text.toString()
+            if (content.isNotBlank()) {
+                viewModel.addPost(content, matchId, "Guest User")
                 binding.commentEditText.text?.clear()
             }
         }
