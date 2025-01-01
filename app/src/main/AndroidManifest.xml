@@ -13,6 +13,10 @@
         android:theme="@style/Theme.FanZone"
         tools:targetApi="31">
         <activity
+            android:name=".view.MatchesFeedActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

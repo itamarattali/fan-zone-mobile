@@ -1,0 +1,76 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Date Selector -->
+    <HorizontalScrollView
+        android:id="@+id/date_selector_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingVertical="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/date_17"
+                style="@style/DateTextViewStyle"
+                android:text="17\nMon"
+                android:background="@drawable/date_selector_unselected" />
+
+            <TextView
+                android:id="@+id/date_18"
+                style="@style/DateTextViewStyle"
+                android:text="18\nTue"
+                android:background="@drawable/date_selector_unselected" />
+
+            <TextView
+                android:id="@+id/date_19"
+                style="@style/DateTextViewStyle"
+                android:text="19\nWed"
+                android:background="@drawable/date_selector_selected" />
+
+            <TextView
+                android:id="@+id/date_20"
+                style="@style/DateTextViewStyle"
+                android:text="20\nThu"
+                android:background="@drawable/date_selector_unselected" />
+
+            <TextView
+                android:id="@+id/date_21"
+                style="@style/DateTextViewStyle"
+                android:text="21\nFri"
+                android:background="@drawable/date_selector_unselected" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Matches List -->
+    <ListView
+        android:id="@+id/matches_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        app:layout_constraintTop_toBottomOf="@id/date_selector_scroll"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav" />
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:menu="@menu/bottom_nav_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
