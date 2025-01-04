@@ -25,7 +25,7 @@ class MatchesFeedActivity : AppCompatActivity() {
         val matchesListView: ListView = findViewById(R.id.matches_list)
 
         // Observe LiveData and update the ListView
-        listMatchViewModel.matches.observe(this) { matches ->
+        listMatchViewModel.filteredMatches.observe(this) { matches ->
             val adapter = ListMatchAdapter(this, matches)
             matchesListView.adapter = adapter
         }
@@ -38,7 +38,7 @@ class MatchesFeedActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("dd\nEEE", Locale.getDefault())
 
         // Add dates: one week before and one week after
-        for (i in -7..7) {
+        for (i in -4..4) {
             val dateTextView = TextView(this)
             calendar.time = today
             calendar.add(Calendar.DAY_OF_YEAR, i)
@@ -66,6 +66,9 @@ class MatchesFeedActivity : AppCompatActivity() {
                 // Center the selected date in the HorizontalScrollView
                 val scrollToX = dateTextView.left - (horizontalScrollView.width / 2) + (dateTextView.width / 2)
                 horizontalScrollView.smoothScrollTo(scrollToX, 0)
+
+                // Notify ViewModel to update matches for the selected date
+                listMatchViewModel.filterMatchesByDate(date)
             }
 
             // Add the TextView to the LinearLayout
@@ -77,6 +80,9 @@ class MatchesFeedActivity : AppCompatActivity() {
                     val initialScrollToX = dateTextView.left - (horizontalScrollView.width / 2) + (dateTextView.width / 2)
                     horizontalScrollView.smoothScrollTo(initialScrollToX, 0)
                 }
+
+                // Filter matches for today's date
+                listMatchViewModel.filterMatchesByDate(today)
             }
         }
     }
