@@ -1,4 +1,4 @@
-package com.example.fanzone
+package com.example.fan_zone
 
 import org.junit.Test
 

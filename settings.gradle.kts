@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FanZone"
+rootProject.name = "fan-zone"
 include(":app")
  

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "398821469620",
+    "project_id": "fan-zone-a78f1",
+    "storage_bucket": "fan-zone-a78f1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398821469620:android:971df0867524de7faa16e1",
+        "android_client_info": {
+          "package_name": "com.example.fan_zone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmu4NvFPHxFo6vNn4_gVktvgh1VjNE6u4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
