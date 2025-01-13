@@ -1,10 +1,13 @@
 package com.example.fanzone.models
 
+import java.util.*
+
 data class Post(
-    val postId: String,
-    val matchId: String,
-    val userName: String,
-    val timestamp: String,
+    val id: String,
+    val username: String,
+    val profileImageUrl: String?,
+    val timePosted: Date,
     val content: String,
-    val likes: Int
+    var likeCount: Int,
+    val matchId: String
 )

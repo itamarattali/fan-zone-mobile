@@ -3,10 +3,17 @@ package com.example.fanzone.repositories
 import com.example.fanzone.models.MatchDetails
 import com.example.fanzone.models.Post
 import kotlinx.coroutines.delay
+import java.util.*
 
 class MatchDetailsRepository {
 
-    private val mockPosts = mutableListOf<Post>()
+    private val mockPosts = mutableListOf(
+        Post("1", "Emma Johnson", null, Date(), "Loved the game!", 15, "1"),
+        Post("2", "John Doe", null, Date(), "Great match!", 5, "1"),
+        Post("3", "Alice Smith", null, Date(), "Amazing game!", 22, "2"),
+        Post("4", "Mark Lee", null, Date(), "Could have been better!", 8, "2")
+    )
+
     private val mockMatchDetails = listOf(
         MatchDetails(
             matchId = "1",
@@ -31,19 +38,19 @@ class MatchDetailsRepository {
         return mockMatchDetails.find { it.matchId == matchId }
     }
 
-    suspend fun fetchYourPosts(matchId: String): List<Post> {
+    suspend fun fetchPosts(matchId: String): List<Post> {
         delay(1000) // Simulate network delay
-        // TODO when dor finished user authentication get the userId
         return mockPosts.filter { it.matchId == matchId }
-    }
-
-    suspend fun fetchPopularPosts(matchId: String): List<Post> {
-        delay(1000) // Simulate network delay
-        return mockPosts.filter { it.matchId == matchId }.sortedBy { it.likes.dec() }
     }
 
     suspend fun addPost(post: Post) {
         delay(500) // Simulate network delay
         mockPosts.add(0, post)
+    }
+
+    suspend fun likePost(postId: String) {
+        delay(200) // Simulate network delay
+        val post = mockPosts.find { it.id == postId }
+        post?.let { it.likeCount += 1 }
     }
 }
