@@ -12,9 +12,6 @@ class MatchDetailsViewModel : ViewModel() {
 
     private val repository = MatchDetailsRepository()
 
-    // Mock current user (replace with real user authentication in the future)
-    private val currentUser = "current_user" // TODO: Replace with authenticated user
-
     private val _popularPosts = MutableLiveData<List<Post>>()
     val popularPosts: LiveData<List<Post>> get() = _popularPosts
 
@@ -25,20 +22,13 @@ class MatchDetailsViewModel : ViewModel() {
         viewModelScope.launch {
             val posts = repository.fetchPosts(matchId)
             _popularPosts.value = posts
-            _userPosts.value = posts.filter { it.username == currentUser }
+            _userPosts.value = posts.filter { it.username == "current_user" } // Mock user
         }
     }
 
     fun likePost(post: Post) {
         viewModelScope.launch {
             repository.likePost(post.id)
-            fetchPosts(post.matchId)
-        }
-    }
-
-    fun addPost(post: Post) {
-        viewModelScope.launch {
-            repository.addPost(post)
             fetchPosts(post.matchId)
         }
     }
