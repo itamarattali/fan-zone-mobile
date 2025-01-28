@@ -50,10 +50,16 @@ dependencies {
 
     // Firebase Auth
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.firestore.ktx)
 
     // Navigation
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+
+    // Picasso
+    implementation(libs.picasso)
+    implementation(libs.firebase.storage.ktx)
 
     // Testing
     testImplementation(libs.junit)

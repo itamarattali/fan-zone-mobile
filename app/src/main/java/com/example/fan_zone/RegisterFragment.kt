@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterFragment : Fragment() {
 
@@ -18,6 +19,7 @@ class RegisterFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,15 +34,21 @@ class RegisterFragment : Fragment() {
 
         // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
+
+        if (firebaseAuth.currentUser != null) {
+            findNavController().navigate(R.id.profileFragment) // Skip login/register
+        }
 
         // Set click listener for the "Sign Up" button
         binding.btnSignUp.setOnClickListener {
+            val fullName = binding.etFullName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
 
             // Validate inputs
-            if (validateInput(email, password)) {
-                createUser(email, password)
+            if (validateInput(fullName, email, password)) {
+                createUser(fullName, email, password)
             }
         }
 
@@ -50,8 +58,13 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun validateInput(email: String, password: String): Boolean {
+    private fun validateInput(fullName: String, email: String, password: String): Boolean {
         return when {
+            TextUtils.isEmpty(fullName) -> {
+                binding.etEmail.error = "Full name is required"
+                false
+            }
+
             TextUtils.isEmpty(email) -> {
                 binding.etEmail.error = "Email is required"
                 false
@@ -76,13 +89,37 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun createUser(email: String, password: String) {
+    private fun createUser(fullName: String, email: String, password: String) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     // Registration success
-                    Toast.makeText(context, "Registration successful", Toast.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_registerFragment_to_homeFragment)
+                    val userId = firebaseAuth.currentUser?.uid
+                    if (userId != null) {
+                        // Save additional user data to Realtime Database
+                        val userMap = mapOf(
+                            "fullName" to fullName,
+                            "email" to email
+                        )
+                        firestore.collection("users").document(userId).set(userMap)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    context,
+                                    "Registration Successful",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                findNavController().navigate(R.id.action_registerFragment_to_profileFragment) {
+                                    popUpTo(R.id.registerFragment) { inclusive = true }
+                                }
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(
+                                    context,
+                                    "Failed to save user data",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
                 } else {
                     // Registration failure
                     Toast.makeText(

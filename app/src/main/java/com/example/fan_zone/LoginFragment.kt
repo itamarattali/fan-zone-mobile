@@ -33,6 +33,10 @@ class LoginFragment : Fragment() {
         // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance()
 
+        if (firebaseAuth.currentUser != null) {
+            findNavController().navigate(R.id.profileFragment) // Skip login/register
+        }
+
         // Set click listener for the "Sign In" button
         binding.btnSignIn.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
@@ -73,7 +77,9 @@ class LoginFragment : Fragment() {
                 if (task.isSuccessful) {
                     // Login success
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                    findNavController().navigate(R.id.action_loginFragment_to_profileFragment) {
+                        popUpTo(R.id.loginFragment) { inclusive = true }
+                    }
                 } else {
                     // Login failure
                     Toast.makeText(
