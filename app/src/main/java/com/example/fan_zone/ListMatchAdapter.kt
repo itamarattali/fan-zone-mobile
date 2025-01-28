@@ -1,3 +1,5 @@
+package com.example.fan_zone
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -5,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.example.fanzone.R
-import com.example.fanzone.model.ListMatch
 
 class ListMatchAdapter(context: Context, matches: List<ListMatch>) :
     ArrayAdapter<ListMatch>(context, 0, matches) {

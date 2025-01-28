@@ -38,4 +38,9 @@
             android:id="@+id/action_profileFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/matchesFeedFragment"
+        android:name="com.example.fan_zone.MatchesFeedFragment"
+        android:label="Matches Feed" />
 </navigation>

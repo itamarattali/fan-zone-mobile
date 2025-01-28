@@ -1,6 +1,5 @@
-package com.example.fanzone
+package com.example.fan_zone
 
-import ListMatchAdapter
 import ListMatchViewModel
 import android.graphics.Color
 import android.os.Bundle
@@ -13,7 +12,6 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.fanzone.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

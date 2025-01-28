@@ -1,10 +1,9 @@
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.fanzone.R
-import com.example.fanzone.model.ListMatch
+import com.example.fan_zone.R
+import com.example.fan_zone.ListMatch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -61,7 +60,6 @@ class ListMatchViewModel : ViewModel() {
 
     fun getRandomDay(): Date {
         val calendar = Calendar.getInstance()
-        val today = calendar.time
         val randomOffset = Random.nextInt(-4, 5) // Range: -4 to +4
         calendar.add(Calendar.DAY_OF_YEAR, randomOffset) // Adjust the date
         return calendar.time

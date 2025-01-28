@@ -1,4 +1,4 @@
-package com.example.fanzone.model
+package com.example.fan_zone
 
 import java.util.Date
 
