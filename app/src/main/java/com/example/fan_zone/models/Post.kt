@@ -1,6 +1,6 @@
-package com.example.fanzone.models
+package com.example.fan_zone.models
 
-import java.util.*
+import java.util.Date
 
 data class Post(
     val id: String,

@@ -1,9 +1,9 @@
-package com.example.fanzone.repositories
+package com.example.fan_zone
 
-import com.example.fanzone.models.MatchDetails
-import com.example.fanzone.models.Post
+import com.example.fan_zone.models.MatchDetails
+import com.example.fan_zone.models.Post
 import kotlinx.coroutines.delay
-import java.util.*
+import java.util.Date
 
 class MatchDetailsRepository {
 

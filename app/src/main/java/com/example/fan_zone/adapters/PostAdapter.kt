@@ -1,15 +1,15 @@
-package com.example.fanzone.adapters
+package com.example.fan_zone.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.fanzone.R
-import com.example.fanzone.models.Post
+import com.example.fan_zone.models.Post
+import com.example.fan_zone.R
 import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
 import java.util.*

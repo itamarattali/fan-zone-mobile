@@ -1,11 +1,11 @@
-package com.example.fanzone.viewmodel
+package com.example.fan_zone.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fanzone.models.Post
-import com.example.fanzone.repositories.MatchDetailsRepository
+import com.example.fan_zone.MatchDetailsRepository
+import com.example.fan_zone.models.Post
 import kotlinx.coroutines.launch
 
 class MatchDetailsViewModel : ViewModel() {

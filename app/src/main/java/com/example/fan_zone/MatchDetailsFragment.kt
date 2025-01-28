@@ -1,4 +1,4 @@
-package com.example.fanzone.ui
+package com.example.fan_zone
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,9 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fanzone.adapters.PostAdapter
-import com.example.fanzone.databinding.FragmentMatchDetailsBinding
-import com.example.fanzone.viewmodel.MatchDetailsViewModel
+import com.example.fan_zone.adapters.PostAdapter
+import com.example.fan_zone.viewModel.MatchDetailsViewModel
+import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
 
 class MatchDetailsFragment : Fragment() {
 
