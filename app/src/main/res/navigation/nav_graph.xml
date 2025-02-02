@@ -2,15 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/matchDetailsFragment">
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/matchesFeedFragment">
 
     <fragment
-        android:id="@+id/matchDetailsFragment"
-        android:name="com.example.fanzone.ui.MatchDetailsFragment"
-        android:label="Match Details"
-        tools:layout="@layout/fragment_match_details">
-        <argument
-            android:name="matchId"
-            app:argType="string" />
-    </fragment>
+        android:id="@+id/matchesFeedFragment"
+        android:name="com.example.fanzone.MatchesFeedFragment"
+        android:label="Matches Feed"
+        tools:layout="@layout/fragment_matches_feed" />
 </navigation>
