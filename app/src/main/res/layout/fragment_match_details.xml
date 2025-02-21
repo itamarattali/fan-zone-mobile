@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -89,13 +90,13 @@
 
     <!-- RecyclerView for Your Posts -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/yourPostsRecyclerView"
-        android:layout_width="0dp"
+        android:id="@+id/recyclerViewYourPosts"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/yourPostsTitle" />
+        app:layout_constraintTop_toBottomOf="@id/yourPostsTitle"
+        tools:listitem="@layout/post_recycler_view_item" />
 
     <!-- Popular Posts Title -->
     <com.google.android.material.textview.MaterialTextView
@@ -106,16 +107,16 @@
         android:text="Popular Posts"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/yourPostsRecyclerView" />
+        app:layout_constraintTop_toBottomOf="@id/recyclerViewYourPosts" />
 
     <!-- RecyclerView for Popular Posts -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/popularPostsRecyclerView"
-        android:layout_width="0dp"
+        android:id="@+id/recyclerViewPopularPosts"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/popularPostsTitle" />
+        app:layout_constraintTop_toBottomOf="@id/popularPostsTitle"
+        tools:listitem="@layout/post_recycler_view_item" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

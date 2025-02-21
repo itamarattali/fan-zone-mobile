@@ -1,4 +1,4 @@
-package com.example.fan_zone
+package com.example.fan_zone.fragments
 
 import android.app.Activity
 import android.content.Intent
@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

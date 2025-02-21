@@ -1,0 +1,36 @@
+package com.example.fan_zone.adapters
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.example.fan_zone.databinding.MatchRecyclerViewListItemBinding
+import com.example.fan_zone.models.Match
+import java.text.SimpleDateFormat
+import java.util.*
+
+class MatchListAdapter(private val matches: List<Match>) :
+    RecyclerView.Adapter<MatchListAdapter.MatchViewHolder>() {
+
+    class MatchViewHolder(private val binding: MatchRecyclerViewListItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(match: Match) {
+            val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+            binding.title.text = "${match.homeTeam} vs ${match.awayTeam}"
+            binding.kickOffTime.text = dateFormatter.format(match.date)
+//            binding.matchLocation.text = "Location: ${match.location}" // Ensure location is properly converted
+//            binding.matchScore.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MatchViewHolder {
+        val binding = MatchRecyclerViewListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return MatchViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: MatchViewHolder, position: Int) {
+        holder.bind(matches[position])
+    }
+
+    override fun getItemCount() = matches.size
+}
