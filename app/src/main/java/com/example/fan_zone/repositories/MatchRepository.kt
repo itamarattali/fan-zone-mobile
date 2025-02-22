@@ -31,10 +31,7 @@ class MatchRepository {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
                     if (response.isSuccessful && response.body() != null) {
                         try {
-                            val jsonObject = JSONObject(response.body()!!) // Convert raw JSON string to JSONObject
-                            val jsonMatches: JSONArray = jsonObject.getJSONArray("matches")
-                            val matches = parseMatches(jsonMatches)
-                            Log.d("FootballData", "Matches: $matches")
+                            val matches = parseMatches(response)
                             _matches.postValue(matches)
                             Log.d("ListMatchViewModel", "Matches updated: $matches")
                         } catch (e: Exception) {
@@ -65,13 +62,15 @@ class MatchRepository {
         return filteredMatches
     }
 
-    private fun parseMatches(jsonArray: JSONArray): MutableList<Match> {
+    private fun parseMatches(response: Response<String>): MutableList<Match> {
+        val jsonObject = JSONObject(response.body()!!) // Convert raw JSON string to JSONObject
+        val jsonMatches: JSONArray = jsonObject.getJSONArray("matches")
         val matches = mutableListOf<Match>()
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
         inputFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-        for (i in 0 until jsonArray.length()) {
-            val jsonObject = jsonArray.getJSONObject(i)
+        for (i in 0 until jsonMatches.length()) {
+            val jsonObject = jsonMatches.getJSONObject(i)
             val id = jsonObject.getInt("id")
             val utcDate: Date = inputFormat.parse(jsonObject.getString("utcDate"))!!
             val homeTeam = jsonObject.getJSONObject("homeTeam").getString("shortName").toString()
