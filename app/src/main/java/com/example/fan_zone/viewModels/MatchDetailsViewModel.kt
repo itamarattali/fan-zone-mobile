@@ -1,4 +1,4 @@
-package com.example.fan_zone.viewModel
+package com.example.fan_zone.viewModels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

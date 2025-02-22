@@ -1,18 +1,17 @@
 package com.example.fan_zone.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
-import com.example.fan_zone.fragments.MatchDetailsFragmentArgs
-import com.example.fan_zone.viewModel.MatchDetailsViewModel
+import com.example.fan_zone.viewModels.MatchDetailsViewModel
 
 class MatchDetailsFragment : Fragment() {
     private var _binding: FragmentMatchDetailsBinding? = null
@@ -31,6 +30,7 @@ class MatchDetailsFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -41,7 +41,6 @@ class MatchDetailsFragment : Fragment() {
         viewModel.match.observe(viewLifecycleOwner) { match ->
             match?.let {
                 binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
-                binding.matchDetailsTextView.text = "Location: ${match.location}"
                 binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
             }
         }
