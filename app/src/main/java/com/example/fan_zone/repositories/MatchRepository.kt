@@ -51,8 +51,8 @@ class MatchRepository {
             })
     }
 
-    fun getMatchById(matchId: String): Match? {
-        return matches.value?.find{ match -> match.id === matchId }
+    fun getMatchById(matchId: Int): Match? {
+        return matches.value?.find{ match -> match.id == matchId }
     }
 
     fun getMatchesByDate(date: Date?): LiveData<MutableList<Match>> {
@@ -60,7 +60,8 @@ class MatchRepository {
         if (date != null) {
             filteredMatches.value = _matches.value?.filter{dateFormat.format(it.date) == dateFormat.format(date)}?.toMutableList()
         }
-
+        Log.d("matches", "getMatchesByDate: " + matches.value.toString())
+        Log.d("filteredMatches", "getMatchesByDate: " + filteredMatches.value.toString())
         return filteredMatches
     }
 
@@ -71,15 +72,15 @@ class MatchRepository {
 
         for (i in 0 until jsonArray.length()) {
             val jsonObject = jsonArray.getJSONObject(i)
-            val id = jsonObject.getJSONObject("id").toString()
+            val id = jsonObject.getInt("id")
             val utcDate: Date = inputFormat.parse(jsonObject.getString("utcDate"))!!
-            val homeTeam = jsonObject.getJSONObject("homeTeam").toString()
-            val awayTeam = jsonObject.getJSONObject("awayTeam").toString()
-            val score = jsonObject.getJSONObject("score").getJSONObject("fullTime")
-            val homeTeamGoals = score.getInt("home")
-            val awayTeamGoals = score.getInt("away")
+            val homeTeam = jsonObject.getJSONObject("homeTeam").getString("shortName").toString()
+            val awayTeam = jsonObject.getJSONObject("awayTeam").getString("shortName").toString()
+//            val score = jsonObject.getJSONObject("score").getJSONObject("fullTime")
+//            val homeTeamGoals = score.getInt("home")
+//            val awayTeamGoals = score.getInt("away")
 
-            matches.add(Match(id, utcDate, homeTeam, awayTeam, homeTeamGoals, awayTeamGoals))
+            matches.add(Match(id, utcDate, homeTeam, awayTeam, 0, 0))
         }
 
         return matches

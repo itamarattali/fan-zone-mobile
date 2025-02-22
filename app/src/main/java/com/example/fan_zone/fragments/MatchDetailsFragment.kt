@@ -35,7 +35,7 @@ class MatchDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Fetch match details
-        viewModel.getMatchDetails(args.matchId)
+        viewModel.getMatchDetails(args.matchId.toInt())
 
         // Observe match details
         viewModel.match.observe(viewLifecycleOwner) { match ->

@@ -31,7 +31,9 @@ class MatchesFeedFragment : Fragment() {
         binding.matchesList.adapter = matchAdapter
 
         matchListViewModel.matches.observe(viewLifecycleOwner) { matches ->
-            matchAdapter.updateMatches(matches)
+            if (!matches.isNullOrEmpty()){
+                matchAdapter.updateMatches(matches)
+            } else matchAdapter.updateMatches(mutableListOf())
         }
 
         setupDateSelector()

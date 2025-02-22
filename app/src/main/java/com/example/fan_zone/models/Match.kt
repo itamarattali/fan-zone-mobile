@@ -4,7 +4,7 @@ package com.example.fan_zone.models
 import java.util.Date
 
 data class Match(
-    val id: String,
+    val id: Int,
     val date: Date,
     val homeTeam: String,
     val awayTeam: String,

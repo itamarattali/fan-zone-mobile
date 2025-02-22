@@ -24,14 +24,14 @@ class MatchDetailsViewModel : ViewModel() {
     private val _userPosts = MutableLiveData<List<Post>>()
     val userPosts: LiveData<List<Post>> get() = _userPosts
 
-    fun getMatchDetails(matchId: String) {
+    fun getMatchDetails(matchId: Int) {
         viewModelScope.launch {
             _match.value = matchRepository.getMatchById(matchId)
             fetchPosts(matchId)
         }
     }
 
-    fun fetchPosts(matchId: String) {
+    fun fetchPosts(matchId: Int) {
         viewModelScope.launch {
             val posts = postRepository.getPostsByMatchID(matchId)
 

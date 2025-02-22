@@ -9,7 +9,7 @@ class PostRepository {
     private val db = FirebaseFirestore.getInstance()
     private val postCollection = db.collection("posts")
 
-    suspend fun getPostsByMatchID(matchId: String): List<Post> {
+    suspend fun getPostsByMatchID(matchId: Int): List<Post> {
         return try {
             val snapshot = postCollection
                 .whereEqualTo("matchId", matchId)
