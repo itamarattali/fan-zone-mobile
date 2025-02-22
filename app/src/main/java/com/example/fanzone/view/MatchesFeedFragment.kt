@@ -1,7 +1,6 @@
 package com.example.fanzone
 
 import ListMatchAdapter
-import ListMatchViewModel
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,7 +12,7 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.fanzone.R
+import com.example.fanzone.viewModel.ListMatchViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -36,20 +35,25 @@ class MatchesFeedFragment : Fragment() {
         val matchesListView: ListView = view.findViewById(R.id.matches_list)
 
         // Observe LiveData and update the ListView
-        listMatchViewModel.filteredMatches.observe(viewLifecycleOwner) { matches ->
-            val adapter = ListMatchAdapter(requireContext(), matches)
-            matchesListView.adapter = adapter
+        listMatchViewModel.filteredMatches.observe(viewLifecycleOwner) { matchList  ->
+            if (!matchList.isNullOrEmpty()){
+                val adapter = ListMatchAdapter(requireContext(), matchList)
+                matchesListView.adapter = adapter
+            }else{
+                val adapter = ListMatchAdapter(requireContext(), mutableListOf())
+                matchesListView.adapter = adapter
+            }
         }
 
         val horizontalScrollView = view.findViewById<HorizontalScrollView>(R.id.date_selector_scroll)
         val dateSelectorLinearLayout = horizontalScrollView.getChildAt(0) as LinearLayout
 
         val calendar = Calendar.getInstance()
-        val today = calendar.time
+        val today = SimpleDateFormat("dd-MM-yyyy").parse("01-02-2025")
         val dateFormat = SimpleDateFormat("dd\nEEE", Locale.getDefault())
 
         // Add dates: one week before and one week after
-        for (i in -4..4) {
+        for (i in -3..3) {
             val dateTextView = TextView(requireContext())
             calendar.time = today
             calendar.add(Calendar.DAY_OF_YEAR, i)

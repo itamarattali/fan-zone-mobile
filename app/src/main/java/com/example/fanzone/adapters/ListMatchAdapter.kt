@@ -8,7 +8,7 @@ import android.widget.TextView
 import com.example.fanzone.R
 import com.example.fanzone.model.ListMatch
 
-class ListMatchAdapter(context: Context, matches: List<ListMatch>) :
+class ListMatchAdapter(context: Context, matches: MutableList<ListMatch>) :
     ArrayAdapter<ListMatch>(context, 0, matches) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
