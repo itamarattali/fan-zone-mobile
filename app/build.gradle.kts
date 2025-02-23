@@ -59,7 +59,7 @@ dependencies {
 
     // Picasso
     implementation(libs.picasso)
-    implementation(libs.firebase.storage.ktx)
+    implementation(libs.cloudinary.cloudinary.android)
 
     // Testing
     testImplementation(libs.junit)
