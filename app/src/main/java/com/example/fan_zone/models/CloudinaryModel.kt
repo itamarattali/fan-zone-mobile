@@ -13,8 +13,8 @@ class CloudinaryModel {
     init {
         val config = mapOf(
             "cloud_name" to "do1wk2owo",
-            "api_key" to "997944638345878",
-            "api_secret" to "ZWiNUBObMuqiivdmdYAahwm1mbA"
+            "api_key" to "",
+            "api_secret" to ""
         )
 
         FanZoneApp.Globals.context?.let {
