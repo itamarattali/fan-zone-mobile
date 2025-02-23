@@ -29,7 +29,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
-            android:id="@+id/textViewMatchName"
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Team A vs Team B"
@@ -37,12 +37,11 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/textViewKickoff"
+            android:id="@+id/kickOffTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:text="Kickoff: 15:00"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

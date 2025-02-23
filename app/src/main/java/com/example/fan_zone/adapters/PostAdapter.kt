@@ -1,56 +1,76 @@
 package com.example.fan_zone.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.fan_zone.models.Post
 import com.example.fan_zone.R
-import com.google.android.material.button.MaterialButton
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.fan_zone.databinding.PostRecyclerViewItemBinding
+import com.example.fan_zone.models.Post
+import com.google.firebase.auth.FirebaseAuth
+import com.squareup.picasso.Picasso
 
 class PostAdapter(
-    private val onLikeClicked: (Post) -> Unit
-) : ListAdapter<Post, PostAdapter.PostViewHolder>(PostDiffCallback()) {
+    private val onLikeClicked: (Post) -> Unit,
+    private val onUnlikeClicked: (Post) -> Unit
+) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
-    inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val profileImageView: ImageView = itemView.findViewById(R.id.profileImageView)
-        val usernameTextView: TextView = itemView.findViewById(R.id.usernameTextView)
-        val timeTextView: TextView = itemView.findViewById(R.id.timeTextView)
-        val postContentTextView: TextView = itemView.findViewById(R.id.postContentTextView)
-        val likeButton: MaterialButton = itemView.findViewById(R.id.likeButton)
-        val likeCountTextView: TextView = itemView.findViewById(R.id.likesCountTextView)
+    private val posts = mutableListOf<Post>()
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun submitList(newPosts: List<Post>) {
+        posts.clear()
+        posts.addAll(newPosts)
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.post_recycler_view_item, parent, false)
-        return PostViewHolder(view)
+        val binding = PostRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return PostViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
+        holder.bind(posts[position], onLikeClicked, onUnlikeClicked, currentUserId)
+    }
 
-        // Set profile picture, username, time, post content, likes
-        holder.profileImageView.setImageResource(R.drawable.ic_user_placeholder)
-        holder.usernameTextView.text = post.username
-        holder.timeTextView.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(post.timePosted)
-        holder.postContentTextView.text = post.content
-        holder.likeCountTextView.text = post.likeCount.toString()
+    override fun getItemCount() = posts.size
 
-        // Like button click listener
-        holder.likeButton.setOnClickListener {
-            onLikeClicked(post)
+    class PostViewHolder(private val binding: PostRecyclerViewItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
+        fun bind(post: Post, onLikeClicked: (Post) -> Unit, onUnlikeClicked: (Post) -> Unit, userId: String?) {
+            binding.usernameTextView.text = post.username
+            binding.contentTextView.text = post.content
+            binding.likeCountTextView.text = "${post.likeCount} likes"
+
+            // Load profile image
+            Picasso.get().load(post.profileImageUrl ?: "").into(binding.profileImageView)
+
+            // Dynamically toggle like/unlike button based on likedUsers
+            updateLikeUI(post, userId)
+
+            // Handle like/unlike click
+            binding.likeIcon.setOnClickListener {
+                if (post.likedUsers.contains(userId)) {
+                    onUnlikeClicked(post)
+                } else {
+                    onLikeClicked(post)
+                }
+            }
+        }
+
+        @SuppressLint("SetTextI18n")
+        private fun updateLikeUI(post: Post, userId: String?) {
+            // Check if user has liked the post
+            val isLiked = userId != null && post.likedUsers.contains(userId)
+
+            // Show correct like/unlike icon
+            binding.likeIcon.setImageResource(
+                if (isLiked) R.drawable.ic_like_filled else R.drawable.ic_like_unfilled
+            )
+
+            // Update like count dynamically
+            binding.likeCountTextView.text = "${post.likeCount} likes"
         }
     }
-}
-
-class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean = oldItem.id == newItem.id
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean = oldItem == newItem
 }

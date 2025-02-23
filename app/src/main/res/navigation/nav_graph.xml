@@ -6,7 +6,7 @@
     <!-- Login Fragment -->
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.fan_zone.LoginFragment"
+        android:name="com.example.fan_zone.fragments.LoginFragment"
         android:label="Login">
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
@@ -19,7 +19,7 @@
     <!-- Register Fragment -->
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.example.fan_zone.RegisterFragment"
+        android:name="com.example.fan_zone.fragments.RegisterFragment"
         android:label="Register">
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
@@ -32,7 +32,7 @@
     <!-- Profile Fragment -->
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.fan_zone.ProfileFragment"
+        android:name="com.example.fan_zone.fragments.ProfileFragment"
         android:label="Profile">
         <action
             android:id="@+id/action_profileFragment_to_loginFragment"
@@ -41,12 +41,12 @@
 
     <fragment
         android:id="@+id/matchesFeedFragment"
-        android:name="com.example.fan_zone.MatchesFeedFragment"
+        android:name="com.example.fan_zone.fragments.MatchesFeedFragment"
         android:label="Matches Feed" />
 
     <fragment
         android:id="@+id/matchDetailsFragment"
-        android:name="com.example.fan_zone.MatchDetailsFragment"
+        android:name="com.example.fan_zone.fragments.MatchDetailsFragment"
         android:label="Match Details">
         <argument
             android:name="matchId"

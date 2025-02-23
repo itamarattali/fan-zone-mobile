@@ -1,4 +1,4 @@
-package com.example.fan_zone
+package com.example.fan_zone.fragments
 
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
 import com.google.firebase.auth.FirebaseAuth
