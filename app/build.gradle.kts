@@ -69,6 +69,9 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
+    // Location Provider
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

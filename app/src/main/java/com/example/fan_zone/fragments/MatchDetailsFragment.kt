@@ -1,24 +1,37 @@
 package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
+import com.example.fan_zone.models.Post
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
+import com.google.firebase.auth.FirebaseAuth
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.addTextChangedListener
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import java.util.Date
 
 class MatchDetailsFragment : Fragment() {
     private var _binding: FragmentMatchDetailsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: MatchDetailsViewModel by viewModels()
-    private val args: MatchDetailsFragmentArgs by navArgs() // Get matchId from navigation arguments
+    private val args: MatchDetailsFragmentArgs by navArgs()
+    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var popularPostsAdapter: PostAdapter
     private lateinit var userPostsAdapter: PostAdapter
 
@@ -27,6 +40,10 @@ class MatchDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMatchDetailsBinding.inflate(inflater, container, false)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        setupClickListeners()
+        observeViewModel()
         return binding.root
     }
 
@@ -62,6 +79,71 @@ class MatchDetailsFragment : Fragment() {
 
         viewModel.userPosts.observe(viewLifecycleOwner) { posts ->
             userPostsAdapter.submitList(posts)
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMsg ->
+            errorMsg?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun getCurrentUser(): String {
+        val currentUser = auth.currentUser
+        return currentUser?.displayName ?: currentUser?.email ?: "Unknown User"
+    }
+
+    private fun checkLocationPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                Toast.makeText(requireContext(), "Please enable location permissions in settings", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    @SuppressLint("MissingPermission")
+    private fun fetchUserLocation(onLocationRetrieved: (Location?) -> Unit) {
+        if (checkLocationPermission()) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
+                onLocationRetrieved(location)
+            }.addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+                onLocationRetrieved(null)
+            }
+        } else {
+            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun createPost(content: String, matchId: String) {
+        fetchUserLocation { location ->
+            val newPost = Post(
+                username = getCurrentUser(),
+                content = content,
+                timePosted = Date(),
+                matchId = matchId,
+                location = location
+            )
+            viewModel.createPost(newPost)
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.postEditText.addTextChangedListener {
+            binding.postButton.isEnabled = it.toString().trim().isNotEmpty()
+        }
+
+        binding.postButton.setOnClickListener {
+            val content = binding.postEditText.text.toString().trim()
+            val matchId = args.matchId
+            createPost(content, matchId)
         }
     }
 

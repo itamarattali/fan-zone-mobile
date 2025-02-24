@@ -15,6 +15,9 @@ class MatchDetailsViewModel : ViewModel() {
     private val matchRepository = MatchRepository()
     private val postRepository = PostRepository()
 
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> get() = _errorMessage
+
     private val _match = MutableLiveData<Match?>()
     val match: LiveData<Match?> get() = _match
 
@@ -24,6 +27,17 @@ class MatchDetailsViewModel : ViewModel() {
     private val _userPosts = MutableLiveData<List<Post>>()
     val userPosts: LiveData<List<Post>> get() = _userPosts
 
+    fun createPost(post: Post) {
+        viewModelScope.launch {
+            try {
+                postRepository.createPost(post)
+                _errorMessage.postValue(null)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to create post")
+            }
+        }
+    }
+
     fun getMatchDetails(matchId: Int) {
         viewModelScope.launch {
             _match.value = matchRepository.getMatchById(matchId)
@@ -31,7 +45,7 @@ class MatchDetailsViewModel : ViewModel() {
         }
     }
 
-    fun fetchPosts(matchId: Int) {
+    private fun fetchPosts(matchId: Int) {
         viewModelScope.launch {
             val posts = postRepository.getPostsByMatchID(matchId)
 

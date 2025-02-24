@@ -10,7 +10,7 @@ data class Post(
     val timePosted: Date = Date(),
     val content: String = "",
     var likeCount: Int = 0,
-    var location: Location,
+    var location: Location?,
     val matchId: String = "",
     val likedUsers: List<String> = emptyList()
 )
