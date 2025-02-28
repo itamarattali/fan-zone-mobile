@@ -8,9 +8,11 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fan_zone.R
 import com.example.fan_zone.adapters.MatchListAdapter
 import com.example.fan_zone.databinding.FragmentMatchesFeedBinding
 import com.example.fan_zone.viewModels.MatchListViewModel
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MatchesFeedFragment : Fragment() {
@@ -43,17 +45,31 @@ class MatchesFeedFragment : Fragment() {
         val dateContainer = binding.dateContainer
         val calendar = Calendar.getInstance()
 
-        for (i in -3..3) {  // Show 3 days back and 3 days forward
+        // Start with 3 days before today, including today, and 3 days after
+        calendar.add(Calendar.DAY_OF_YEAR, -3)  // Start 3 days before today
+
+        for (i in -3..3) {  // Show 3 days back, today, and 3 days forward
             val button = Button(requireContext()).apply {
                 val date = calendar.time
+                // Get the day of the week and the date
+                val dayOfWeek = android.text.format.DateFormat.format("EEE", date).toString()
+                val formattedDate = android.text.format.DateFormat.format("dd", date).toString()
+                // Set the button text to display the date and day
+                text = "$formattedDate\n$dayOfWeek"
 
+                // Use the correct method to set the text appearance
+                setTextAppearance(R.style.DateButtonStyle)  // No need for the context
+
+                // Handle button click
                 setOnClickListener {
                     matchListViewModel.loadMatchesForDate(date)
                 }
             }
 
+            // Add the button to the container
             dateContainer.addView(button)
-            calendar.add(Calendar.DAY_OF_YEAR, 1) // Move to next day
+            calendar.add(Calendar.DAY_OF_YEAR, 1) // Move to the next day
         }
     }
+
 }

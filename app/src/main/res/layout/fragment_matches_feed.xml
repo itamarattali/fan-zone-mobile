@@ -24,6 +24,7 @@
             android:divider="@android:color/transparent"
             android:showDividers="middle"
             android:dividerPadding="16dp"/>
+
     </HorizontalScrollView>
 
     <!-- RecyclerView for Matches -->

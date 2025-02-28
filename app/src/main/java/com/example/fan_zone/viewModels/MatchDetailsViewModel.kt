@@ -1,5 +1,7 @@
 package com.example.fan_zone.viewModels
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,9 +12,9 @@ import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
 import kotlinx.coroutines.launch
 
-class MatchDetailsViewModel : ViewModel() {
+class MatchDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val matchRepository = MatchRepository()
+    private val matchRepository = MatchRepository(application)
     private val postRepository = PostRepository()
 
     private val _match = MutableLiveData<Match?>()
@@ -26,7 +28,7 @@ class MatchDetailsViewModel : ViewModel() {
 
     fun getMatchDetails(matchId: Int) {
         viewModelScope.launch {
-            _match.value = matchRepository.getMatchById(matchId)
+            _match.value = matchRepository.getMatchById(matchId).value
             fetchPosts(matchId)
         }
     }

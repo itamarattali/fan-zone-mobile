@@ -6,7 +6,7 @@
     <!-- Login Fragment -->
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.fan_zone.fragments.LoginFragment"
+        android:name="com.example.fan_zone.fragments.MatchesFeedFragment"
         android:label="Login">
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
