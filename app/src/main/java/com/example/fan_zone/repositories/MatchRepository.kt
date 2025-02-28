@@ -62,9 +62,7 @@ class MatchRepository(context: Context) {
     // Get matches by date from the Room database
     fun getMatchesByDate(date: Date): LiveData<List<Match>> {
         val (startMillis, endMillis) = getStartAndEndOfDayInMillis(date)
-        val a = matchDao.getMatchesByDate(startMillis, endMillis)
-        Log.d("click", "getMatchesByDate: " + a.value.toString())
-        return a
+        return matchDao.getMatchesByDate(startMillis, endMillis)
     }
 
     fun getStartAndEndOfDayInMillis(date: Date): Pair<Long, Long> {

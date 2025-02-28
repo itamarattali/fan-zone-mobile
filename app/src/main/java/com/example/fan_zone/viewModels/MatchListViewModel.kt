@@ -31,7 +31,6 @@ class MatchListViewModel(application: Application) : AndroidViewModel(applicatio
         selectedDate.value?.let {
             matchRepository.getMatchesByDate(it).observeForever {
                 _matches.value = it
-                Log.d("click", "loadMatchesForDate: " + _matches.value)
             }
         }
     }
