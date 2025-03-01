@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fan_zone.databinding.MatchRecyclerViewListItemBinding
 import com.example.fan_zone.models.Match
+import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -20,6 +21,7 @@ class MatchListAdapter(private val matches: MutableList<Match>) :
 
             binding.title.text = "${match.homeTeam} vs ${match.awayTeam}"
             binding.kickOffTime.text = dateFormatter.format(match.date)
+            Picasso.get().load(match.matchImage ?: "").into(binding.imageViewTeamLogo)
 //            binding.matchScore.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
         }
     }

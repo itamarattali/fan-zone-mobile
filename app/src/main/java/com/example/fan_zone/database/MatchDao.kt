@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.fan_zone.models.Match
-import java.util.Date
 
 @Dao
 interface MatchDao {

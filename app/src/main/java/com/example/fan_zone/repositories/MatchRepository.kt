@@ -101,13 +101,15 @@ class MatchRepository(context: Context) {
             val jsonObject = jsonMatches.getJSONObject(i)
             val id = jsonObject.getInt("id")
             val utcDate: Date = inputFormat.parse(jsonObject.getString("utcDate"))!!
-            val homeTeam = jsonObject.getJSONObject("homeTeam").getString("shortName").toString()
-            val awayTeam = jsonObject.getJSONObject("awayTeam").getString("shortName").toString()
+            val homeTeam = jsonObject.getJSONObject("homeTeam")
+            val awayTeamDisplayName = jsonObject.getJSONObject("awayTeam").getString("shortName").toString()
+            val homeTeamDisplayName = homeTeam.getString("shortName").toString()
+            val homeTeamImage = homeTeam.getString("crest").toString()
             // val score = jsonObject.getJSONObject("score").getJSONObject("fullTime")
             // val homeTeamGoals = score.getInt("home")
             // val awayTeamGoals = score.getInt("away")
 
-            matches.add(Match(id, utcDate, homeTeam, awayTeam, 0, 0))
+            matches.add(Match(id, utcDate, homeTeamDisplayName, awayTeamDisplayName, homeTeamImage, 0, 0))
         }
 
         return matches
