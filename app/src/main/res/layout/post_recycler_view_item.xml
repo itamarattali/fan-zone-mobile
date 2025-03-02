@@ -40,14 +40,66 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <!-- Post Content -->
-        <TextView
+        <!-- Post Content (Hidden when editing) -->
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contentTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginBottom="5dp"
+            android:visibility="visible"/>
+
+        <!-- 🔹 Edit Post Input (Replaces old content while editing) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/editPostContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Post content here"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:paddingTop="8dp" />
+            android:visibility="gone"
+            app:boxStrokeColor="@color/primary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editPostEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minHeight="80dp"
+                android:padding="8dp"
+                android:textSize="14sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 🔹 Edit Action Buttons (Visible only in edit mode) -->
+        <LinearLayout
+            android:id="@+id/editActionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:gravity="end"
+            android:layout_marginTop="5dp">
+
+            <!-- 🔹 Cancel Edit Button (Only Shown During Editing) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cancelEditButton"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:icon="@drawable/ic_cancel"
+                android:iconSize="24dp"
+                android:text=""
+                android:visibility="gone"
+                app:backgroundTint="@color/gray" />
+
+            <!-- Submit Edit Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/submitEditButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Post"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@color/primary"
+                android:visibility="gone"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
 
         <!-- Like Section -->
         <LinearLayout
@@ -71,10 +123,20 @@
                 android:id="@+id/likeCountTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0 likes"
                 android:layout_marginStart="8dp"
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <!-- "Edit Post" Option (Only Shown for Post Owner) -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/editPostText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Post"
+            android:textColor="@color/blue"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="5dp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

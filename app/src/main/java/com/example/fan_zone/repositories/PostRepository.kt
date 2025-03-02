@@ -19,6 +19,15 @@ class PostRepository {
         }
     }
 
+    suspend fun updatePost(postId: String, newContent: String) {
+        try {
+            val postRef = postCollection.document(postId)
+            postRef.update("content", newContent).await()
+        } catch (e: Exception) {
+            throw Exception("Error updating post: ${e.message}")
+        }
+    }
+
     suspend fun getPostsByMatchID(matchId: Int): List<Post> {
         return try {
             val snapshot = postCollection

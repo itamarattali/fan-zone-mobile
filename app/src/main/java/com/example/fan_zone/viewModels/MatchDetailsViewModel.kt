@@ -31,9 +31,18 @@ class MatchDetailsViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 postRepository.createPost(post)
-                _errorMessage.postValue(null)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to create post")
+            }
+        }
+    }
+
+    fun updatePost(postId: String, newContent: String) {
+        viewModelScope.launch {
+            try {
+                postRepository.updatePost(postId, newContent)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to update post")
             }
         }
     }
