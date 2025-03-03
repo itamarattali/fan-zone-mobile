@@ -47,7 +47,7 @@ class PostAdapter(
     @SuppressLint("NotifyDataSetChanged")
     private fun fetchCurrentUsername() {
         val userId = firebaseAuth.currentUser?.uid ?: return
-        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId) // 🔹 Fetch user info from Firestore
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
 
         userRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
