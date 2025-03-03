@@ -17,6 +17,9 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     private val matchRepository = MatchRepository(application)
     private val postRepository = PostRepository()
 
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> get() = _errorMessage
+
     private val _match = MutableLiveData<Match?>()
     val match: LiveData<Match?> get() = _match
 
@@ -26,6 +29,26 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     private val _userPosts = MutableLiveData<List<Post>>()
     val userPosts: LiveData<List<Post>> get() = _userPosts
 
+    fun createPost(post: Post) {
+        viewModelScope.launch {
+            try {
+                postRepository.createPost(post)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to create post")
+            }
+        }
+    }
+
+    fun updatePost(postId: String, newContent: String) {
+        viewModelScope.launch {
+            try {
+                postRepository.updatePost(postId, newContent)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to update post")
+            }
+        }
+    }
+
     fun getMatchDetails(matchId: Int) {
         viewModelScope.launch {
             _match.value = matchRepository.getMatchById(matchId).value
@@ -33,7 +56,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun fetchPosts(matchId: Int) {
+    private fun fetchPosts(matchId: Int) {
         viewModelScope.launch {
             val posts = postRepository.getPostsByMatchID(matchId)
 

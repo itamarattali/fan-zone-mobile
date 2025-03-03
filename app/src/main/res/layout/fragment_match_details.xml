@@ -23,7 +23,7 @@
         android:id="@+id/matchTitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,10 +32,11 @@
     <!-- Match Details -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/matchDetailsTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="6dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/matchTitleTextView" />
 
     <!-- Match Result -->
@@ -43,39 +44,45 @@
         android:id="@+id/matchResultTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="6dp"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/matchDetailsTextView" />
 
-    <!-- Input Field -->
+    <!-- Post Input Field -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/commentInputLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:hint="Write your thoughts about the match..."
+        app:boxStrokeColor="@color/primary"
+        app:layout_constraintTop_toBottomOf="@id/matchResultTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/matchResultTextView">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/commentEditText"
+            android:id="@+id/postEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Write your thoughts about this match..."
-            android:inputType="text" />
+            android:inputType="textMultiLine"
+            android:minHeight="100dp"
+            android:gravity="top"
+            android:padding="10dp"
+            android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Send Button -->
+    <!-- Post Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/sendCommentButton"
-        android:layout_width="wrap_content"
+        android:id="@+id/postButton"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Send"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Post"
+        android:enabled="false"
+        android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/commentInputLayout" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="12dp" />
+
 
     <!-- Your Posts Title -->
     <com.google.android.material.textview.MaterialTextView
@@ -86,7 +93,7 @@
         android:text="Your Posts"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sendCommentButton" />
+        app:layout_constraintTop_toBottomOf="@id/yourPostsTitle" />
 
     <!-- RecyclerView for Your Posts -->
     <androidx.recyclerview.widget.RecyclerView
@@ -103,7 +110,7 @@
         android:id="@+id/popularPostsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="Popular Posts"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
