@@ -10,6 +10,9 @@ import com.example.fan_zone.repositories.MatchRepository
 import com.example.fan_zone.repositories.PostRepository
 import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 class MatchDetailsViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,14 +42,34 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun updatePost(postId: String, newContent: String) {
+    fun updatePost(post: Post) {
         viewModelScope.launch {
             try {
-                postRepository.updatePost(postId, newContent)
+                postRepository.updatePost(post.id, post.content)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to update post")
             }
         }
+    }
+
+    fun likePost(post: Post) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
+        postRef.update(
+            "likedUsers", FieldValue.arrayUnion(userId),
+            "likeCount", FieldValue.increment(1)
+        )
+    }
+
+    fun unlikePost(post: Post) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
+        postRef.update(
+            "likedUsers", FieldValue.arrayRemove(userId),
+            "likeCount", FieldValue.increment(-1)
+        )
     }
 
     fun getMatchDetails(matchId: Int) {
@@ -64,11 +87,5 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
             val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
             _userPosts.value = posts.filter { it.id == currentUserId }
         }
-    }
-    public fun likePost(post: Post) {
-    }
-    public fun unlikePost(post: Post) {
-    }
-    public fun editPost(post: Post) {
     }
 }

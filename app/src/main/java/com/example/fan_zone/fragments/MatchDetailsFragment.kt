@@ -66,13 +66,13 @@ class MatchDetailsFragment : Fragment() {
         popularPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.editPost(post) }
+            onEditPost = { post -> viewModel.updatePost(post) }
         )
 
         userPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.editPost(post) }
+            onEditPost = { post -> viewModel.updatePost(post) }
         )
 
         binding.recyclerViewPopularPosts.layoutManager = LinearLayoutManager(requireContext())
