@@ -63,14 +63,14 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    suspend fun likePost(post: Post) {
+    fun likePost(post: Post) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update(
             "likedUsers", FieldValue.arrayUnion(userId),
             "likeCount", FieldValue.increment(1)
-            ).await()
+        )
 
             // Update LiveData immediately
             updatePostInLists(post.copy(
@@ -80,14 +80,14 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         )
     }
 
-    suspend fun unlikePost(post: Post) {
+    fun unlikePost(post: Post) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update(
             "likedUsers", FieldValue.arrayRemove(userId),
             "likeCount", FieldValue.increment(-1)
-        ).await()
+        )
 
         // Update LiveData immediately
         updatePostInLists(post.copy(
