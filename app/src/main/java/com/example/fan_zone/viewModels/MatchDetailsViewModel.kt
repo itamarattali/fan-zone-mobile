@@ -65,4 +65,10 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
             _userPosts.value = posts.filter { it.id == currentUserId }
         }
     }
+    public fun likePost(post: Post) {
+    }
+    public fun unlikePost(post: Post) {
+    }
+    public fun editPost(post: Post) {
+    }
 }
