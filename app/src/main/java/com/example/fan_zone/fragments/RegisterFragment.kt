@@ -37,10 +37,6 @@ class RegisterFragment : Fragment() {
         firebaseAuth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        if (firebaseAuth.currentUser != null) {
-            findNavController().navigate(R.id.profileFragment) // Skip login/register
-        }
-
         // Set click listener for the "Sign Up" button
         binding.btnSignUp.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
@@ -100,7 +96,8 @@ class RegisterFragment : Fragment() {
                         // Save additional user data to Realtime Database
                         val userMap = mapOf(
                             "fullName" to fullName,
-                            "email" to email
+                            "email" to email,
+                            "profilePicUrl" to ""
                         )
                         firestore.collection("users").document(userId).set(userMap)
                             .addOnSuccessListener {

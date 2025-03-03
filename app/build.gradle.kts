@@ -1,9 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+}
+
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
 }
 
 android {
@@ -38,6 +44,29 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.buildConfigFields.put(
+            "CLOUDINARY_API_KEY",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["cloudinary_api_key"]}\"",
+                "API Key"
+            )
+        )
+        variant.buildConfigFields.put(
+            "CLOUDINARY_API_SECRET",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["cloudinary_api_secret"]}\"",
+                "API Secret"
+            )
+        )
+
     }
 }
 

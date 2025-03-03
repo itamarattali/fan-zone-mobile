@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.fan_zone" />
-                  <option name="mobileSdkAppId" value="1:398821469620:android:971df0867524de7faa16e1" />
-                  <option name="projectId" value="fan-zone-a78f1" />
-                  <option name="projectNumber" value="398821469620" />
+                  <option name="mobileSdkAppId" value="1:69954236651:android:f79f83c63a1285fde20eae" />
+                  <option name="projectId" value="fan-zone-9af90" />
+                  <option name="projectNumber" value="69954236651" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
