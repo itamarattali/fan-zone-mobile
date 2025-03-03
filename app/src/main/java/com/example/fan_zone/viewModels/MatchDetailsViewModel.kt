@@ -4,13 +4,16 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fan_zone.repositories.MatchRepository
 import com.example.fan_zone.repositories.PostRepository
 import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class MatchDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -33,20 +36,64 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             try {
                 postRepository.createPost(post)
+
+                val updatedUserPosts = _userPosts.value.orEmpty().toMutableList()
+                updatedUserPosts.add(0, post)
+                _userPosts.postValue(updatedUserPosts)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to create post")
             }
         }
     }
 
-    fun updatePost(postId: String, newContent: String) {
+    fun updatePost(post: Post) {
         viewModelScope.launch {
             try {
-                postRepository.updatePost(postId, newContent)
+                postRepository.updatePost(post.id, post.content)
+
+                // Manually update the LiveData list to reflect the edited post
+                val updatedUserPosts = _userPosts.value?.map {
+                    if (it.id == post.id) post.copy() else it
+                } ?: emptyList()
+
+                _userPosts.postValue(updatedUserPosts)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to update post")
             }
         }
+    }
+
+    suspend fun likePost(post: Post) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
+
+        postRef.update(
+            "likedUsers", FieldValue.arrayUnion(userId),
+            "likeCount", FieldValue.increment(1)
+            ).await()
+
+            // Update LiveData immediately
+            updatePostInLists(post.copy(
+                likedUsers = post.likedUsers + userId,
+                likeCount = post.likeCount + 1
+            )
+        )
+    }
+
+    suspend fun unlikePost(post: Post) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
+
+        postRef.update(
+            "likedUsers", FieldValue.arrayRemove(userId),
+            "likeCount", FieldValue.increment(-1)
+        ).await()
+
+        // Update LiveData immediately
+        updatePostInLists(post.copy(
+            likedUsers = post.likedUsers.filter { it != userId },
+            likeCount = post.likeCount - 1
+        ))
     }
 
     fun getMatchDetails(matchId: Int) {
@@ -61,14 +108,13 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
             val posts = postRepository.getPostsByMatchID(matchId)
 
             _popularPosts.value = posts.sortedByDescending { it.likeCount } // Most liked first
-            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
             _userPosts.value = posts.filter { it.id == currentUserId }
         }
     }
-    public fun likePost(post: Post) {
-    }
-    public fun unlikePost(post: Post) {
-    }
-    public fun editPost(post: Post) {
+
+    private fun updatePostInLists(updatedPost: Post) {
+        _userPosts.postValue(_userPosts.value?.map { if (it.id == updatedPost.id) updatedPost else it })
+        _popularPosts.postValue(_popularPosts.value?.map { if (it.id == updatedPost.id) updatedPost else it })
     }
 }
