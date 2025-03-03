@@ -12,9 +12,9 @@ import java.io.File
 class CloudinaryModel {
     init {
         val config = mapOf(
-            "cloud_name" to "do1wk2owo",
-            "api_key" to "",
-            "api_secret" to ""
+            "cloud_name" to "dcvscarx8",
+            "api_key" to com.example.fan_zone.BuildConfig.CLOUDINARY_API_KEY,
+            "api_secret" to com.example.fan_zone.BuildConfig.CLOUDINARY_API_SECRET
         )
 
         FanZoneApp.Globals.context?.let {

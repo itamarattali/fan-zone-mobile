@@ -2,6 +2,7 @@ package com.example.fan_zone.fragments
 
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,7 +63,10 @@ class ProfileFragment : Fragment() {
                             Picasso.get()
                                 .load(profilePicUrl)
                                 .placeholder(R.drawable.default_pfp)
+                                .error(R.drawable.default_pfp)
                                 .into(binding.ivProfilePicture)
+                        } else {
+                            binding.ivProfilePicture.setImageResource(R.drawable.default_pfp)
                         }
                     } else {
                         Toast.makeText(context, "User data not found", Toast.LENGTH_SHORT).show()
@@ -108,43 +112,45 @@ class ProfileFragment : Fragment() {
         binding.btnSave.visibility = View.GONE
         binding.btnChangePicture.visibility = View.GONE
 
-        if (userId == null) {
-            return
-        }
-
         if (shouldUpdateProfilePicture) {
             val bitmap = (binding.ivProfilePicture.drawable as BitmapDrawable).bitmap
             model.uploadImageToCloudinary(bitmap, "${userId}_profile_pic", { imageUrl ->
                 run {
-                    updateProfile(userId, binding.etFullName.text.toString().trim(), imageUrl)
+                    updateProfile(userId, binding.etFullName.text.toString().trim(), imageUrl ?: "")
                 }
-            }, {
-                updateProfile(userId, binding.etFullName.text.toString().trim(), "")
-                Toast.makeText(context, "Failed to upload new profile picture", Toast.LENGTH_SHORT)
-                    .show()
+            }, { error ->
+                run {
+                    Log.i("Cloudinary error", error ?: "")
+                    Toast.makeText(
+                        context,
+                        "Failed to upload new profile picture, profile isn't updated",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
             })
+        } else {
+            updateProfile(userId, binding.etFullName.text.toString().trim(), null)
         }
     }
 
-    private fun updateProfile(userId: String, newFullName: String, newImageUrl: String?) {
-        val userUpdates = mutableMapOf("fullName" to newFullName)
-        newImageUrl?.let { userUpdates["profilePicUrl"] = it }
+    private fun updateProfile(userId: String?, newFullName: String, newImageUrl: String?) {
+        val userUpdates = mutableMapOf<String, Any>("fullName" to newFullName)
+        if (newImageUrl != null) {
+            userUpdates["profilePicUrl"] = newImageUrl
+        }
+
+        if (userId == null) return
 
         firestore.collection("users").document(userId)
-            .update(userUpdates as Map<String, Any>)
+            .update(userUpdates)
             .addOnSuccessListener {
-                Toast.makeText(context, "Profile updated", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(context, "Profile updated", Toast.LENGTH_SHORT).show()
+                shouldUpdateProfilePicture = false
             }
             .addOnFailureListener {
-                Toast.makeText(
-                    context,
-                    "Failed to update profile",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
             }
-
-
     }
 
     private fun pickImageFromGallery() {
