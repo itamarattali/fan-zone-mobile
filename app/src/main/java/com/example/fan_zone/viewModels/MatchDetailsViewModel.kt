@@ -36,6 +36,10 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             try {
                 postRepository.createPost(post)
+
+                val updatedUserPosts = _userPosts.value.orEmpty().toMutableList()
+                updatedUserPosts.add(0, post)
+                _userPosts.postValue(updatedUserPosts)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to create post")
             }
