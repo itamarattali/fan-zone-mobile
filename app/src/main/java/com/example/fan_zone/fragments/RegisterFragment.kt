@@ -1,5 +1,6 @@
 package com.example.fan_zone.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Patterns
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.fan_zone.MainActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -106,9 +108,8 @@ class RegisterFragment : Fragment() {
                                     "Registration Successful",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                findNavController().navigate(R.id.action_registerFragment_to_profileFragment) {
-                                    popUpTo(R.id.registerFragment) { inclusive = true }
-                                }
+                                requireActivity().finish()
+                                startActivity(Intent(requireContext(), MainActivity::class.java))
                             }
                             .addOnFailureListener {
                                 Toast.makeText(

@@ -1,5 +1,6 @@
 package com.example.fan_zone.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Patterns
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.fan_zone.MainActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentLoginBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -78,9 +80,8 @@ class LoginFragment : Fragment() {
                 if (task.isSuccessful) {
                     // Login success
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_loginFragment_to_profileFragment) {
-                        popUpTo(R.id.loginFragment) { inclusive = true }
-                    }
+                    requireActivity().finish()
+                    startActivity(Intent(requireContext(), MainActivity::class.java))
                 } else {
                     // Login failure
                     Toast.makeText(
