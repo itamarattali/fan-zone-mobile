@@ -30,7 +30,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Change Picture Button -->
         <Button
             android:id="@+id/btnChangePicture"
             android:layout_width="wrap_content"
@@ -42,7 +41,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ivProfilePicture" />
 
-        <!-- Full Name (Display Mode) -->
         <TextView
             android:id="@+id/tvFullName"
             android:layout_width="wrap_content"
@@ -54,7 +52,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnChangePicture" />
 
-        <!-- Full Name Input (Edit Mode) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilFullName"
             android:layout_width="0dp"
@@ -73,7 +70,6 @@
                 android:hint="Enter Full Name" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Edit Button -->
         <Button
             android:id="@+id/btnEdit"
             android:layout_width="wrap_content"
@@ -84,7 +80,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvFullName" />
 
-        <!-- Save Button -->
         <Button
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"

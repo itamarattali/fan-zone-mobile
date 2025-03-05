@@ -88,8 +88,8 @@ class ProfileFragment : Fragment() {
                 }
             }
             .addOnFailureListener {
-                showLoading(false)
                 showToast("Failed to load profile")
+                showLoading(false)
             }
     }
 
@@ -131,13 +131,15 @@ class ProfileFragment : Fragment() {
     }
 
     private fun saveEditChanges(userId: String) {
-        exitEditMode()
+        showLoading(true)
 
         if (shouldUpdateProfilePicture) {
             uploadNewProfilePicture(userId)
         } else {
             updateProfile(userId, binding.etFullName.text.toString().trim(), null)
         }
+
+        exitEditMode()
     }
 
     private fun exitEditMode() {
@@ -160,6 +162,7 @@ class ProfileFragment : Fragment() {
             { error ->
                 Log.e("Cloudinary", "Upload error: ${error ?: "Unknown error"}")
                 showToast("Failed to upload new profile picture")
+                showLoading(false)
             }
         )
     }
@@ -173,9 +176,11 @@ class ProfileFragment : Fragment() {
             .addOnSuccessListener {
                 showToast("Profile updated")
                 shouldUpdateProfilePicture = false
+                loadUserProfile()
             }
             .addOnFailureListener {
                 showToast("Failed to update profile")
+                showLoading(false)
             }
     }
 
