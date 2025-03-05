@@ -12,7 +12,11 @@
     <fragment
         android:id="@+id/matchesFeedFragment"
         android:name="com.example.fan_zone.fragments.MatchesFeedFragment"
-        android:label="Matches Feed" />
+        android:label="Matches Feed">
+        <action
+            android:id="@+id/action_matchesFeedFragment_to_matchDetailsFragment"
+            app:destination="@id/matchDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/matchDetailsFragment"
