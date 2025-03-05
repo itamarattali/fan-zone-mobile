@@ -1,5 +1,6 @@
 package com.example.fan_zone.fragments
 
+import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import com.example.fan_zone.AuthActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
@@ -91,9 +92,8 @@ class ProfileFragment : Fragment() {
 
         binding.btnSignOut.setOnClickListener {
             firebaseAuth.signOut()
-            findNavController().navigate(R.id.action_profileFragment_to_loginFragment) {
-                popUpTo(R.id.profileFragment) { inclusive = true }
-            }
+            requireActivity().finish()
+            startActivity(Intent(requireContext(), AuthActivity::class.java))
         }
     }
 
