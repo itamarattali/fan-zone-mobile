@@ -15,6 +15,7 @@ import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 
@@ -27,14 +28,16 @@ class ProfileFragment : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var model: Model
 
-    private val cameraLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            binding.ivProfilePicture.setImageBitmap(bitmap)
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+        bitmap?.let {
+            binding.ivProfilePicture.setImageBitmap(it)
             shouldUpdateProfilePicture = true
         }
+    }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
@@ -43,118 +46,155 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initialize()
+        setupUI()
+        loadUserProfile()
+    }
 
+    private fun initialize() {
         firebaseAuth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
         model = Model.shared
+    }
 
-        val userId = firebaseAuth.currentUser?.uid
-
-        if (userId != null) {
-            firestore.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val fullName = document.getString("fullName")
-                        val profilePicUrl = document.getString("profilePicUrl")
-
-                        binding.tvFullName.text = fullName
-                        binding.etFullName.setText(fullName)
-
-                        if (!profilePicUrl.isNullOrEmpty()) {
-                            Picasso.get()
-                                .load(profilePicUrl)
-                                .placeholder(R.drawable.default_pfp)
-                                .error(R.drawable.default_pfp)
-                                .into(binding.ivProfilePicture)
-                        } else {
-                            binding.ivProfilePicture.setImageResource(R.drawable.default_pfp)
-                        }
-                    } else {
-                        Toast.makeText(context, "User data not found", Toast.LENGTH_SHORT).show()
-                    }
+    private fun setupUI() {
+        with(binding) {
+            btnEdit.setOnClickListener { enterEditMode() }
+            btnSave.setOnClickListener {
+                firebaseAuth.currentUser?.uid?.let { userId ->
+                    saveEditChanges(userId)
                 }
-                .addOnFailureListener {
-                    Toast.makeText(context, "Failed to load profile", Toast.LENGTH_SHORT).show()
+            }
+            btnChangePicture.setOnClickListener { pickImageFromGallery() }
+            btnSignOut.setOnClickListener { signOut() }
+        }
+    }
+
+    private fun loadUserProfile() {
+        val userId = firebaseAuth.currentUser?.uid ?: run {
+            navigateToAuth()
+            return
+        }
+
+        showLoading(true)
+
+        firestore.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                showLoading(false)
+                if (document.exists()) {
+                    updateUIWithUserData(document)
+                } else {
+                    showToast("User data not found")
                 }
-        }
+            }
+            .addOnFailureListener {
+                showLoading(false)
+                showToast("Failed to load profile")
+            }
+    }
 
-        binding.btnEdit.setOnClickListener {
-            enterEditMode()
+    private fun showLoading(isLoading: Boolean) {
+        binding.apply {
+            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            contentLayout.visibility = if (isLoading) View.GONE else View.VISIBLE
         }
+    }
 
-        binding.btnSave.setOnClickListener {
-            saveEditChanges(userId)
-        }
+    private fun updateUIWithUserData(document: DocumentSnapshot) {
+        val fullName = document.getString("fullName")
+        val profilePicUrl = document.getString("profilePicUrl")
 
-        binding.btnChangePicture.setOnClickListener {
-            pickImageFromGallery()
-        }
+        binding.apply {
+            tvFullName.text = fullName
+            etFullName.setText(fullName)
 
-        binding.btnSignOut.setOnClickListener {
-            firebaseAuth.signOut()
-            requireActivity().finish()
-            startActivity(Intent(requireContext(), AuthActivity::class.java))
+            if (!profilePicUrl.isNullOrEmpty()) {
+                Picasso.get()
+                    .load(profilePicUrl)
+                    .placeholder(R.drawable.default_pfp)
+                    .error(R.drawable.default_pfp)
+                    .into(ivProfilePicture)
+            } else {
+                ivProfilePicture.setImageResource(R.drawable.default_pfp)
+            }
         }
     }
 
     private fun enterEditMode() {
-        binding.tvFullName.visibility = View.GONE
-        binding.btnEdit.visibility = View.GONE
-        binding.tilFullName.visibility = View.VISIBLE
-        binding.btnSave.visibility = View.VISIBLE
-        binding.btnChangePicture.visibility = View.VISIBLE
+        binding.apply {
+            tvFullName.visibility = View.GONE
+            btnEdit.visibility = View.GONE
+            tilFullName.visibility = View.VISIBLE
+            btnSave.visibility = View.VISIBLE
+            btnChangePicture.visibility = View.VISIBLE
+        }
     }
 
-    private fun saveEditChanges(userId: String?) {
-        binding.tvFullName.visibility = View.VISIBLE
-        binding.btnEdit.visibility = View.VISIBLE
-        binding.tilFullName.visibility = View.GONE
-        binding.btnSave.visibility = View.GONE
-        binding.btnChangePicture.visibility = View.GONE
+    private fun saveEditChanges(userId: String) {
+        exitEditMode()
 
         if (shouldUpdateProfilePicture) {
-            val bitmap = (binding.ivProfilePicture.drawable as BitmapDrawable).bitmap
-            model.uploadImageToCloudinary(bitmap, "${userId}_profile_pic", { imageUrl ->
-                run {
-                    updateProfile(userId, binding.etFullName.text.toString().trim(), imageUrl ?: "")
-                }
-            }, { error ->
-                run {
-                    Log.i("Cloudinary error", error ?: "")
-                    Toast.makeText(
-                        context,
-                        "Failed to upload new profile picture, profile isn't updated",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
-            })
+            uploadNewProfilePicture(userId)
         } else {
             updateProfile(userId, binding.etFullName.text.toString().trim(), null)
         }
     }
 
-    private fun updateProfile(userId: String?, newFullName: String, newImageUrl: String?) {
-        val userUpdates = mutableMapOf<String, Any>("fullName" to newFullName)
-        if (newImageUrl != null) {
-            userUpdates["profilePicUrl"] = newImageUrl
+    private fun exitEditMode() {
+        binding.apply {
+            tvFullName.visibility = View.VISIBLE
+            btnEdit.visibility = View.VISIBLE
+            tilFullName.visibility = View.GONE
+            btnSave.visibility = View.GONE
+            btnChangePicture.visibility = View.GONE
         }
+    }
 
-        if (userId == null) return
+    private fun uploadNewProfilePicture(userId: String) {
+        val bitmap = (binding.ivProfilePicture.drawable as? BitmapDrawable)?.bitmap ?: return
+
+        model.uploadImageToCloudinary(
+            bitmap,
+            "${userId}_profile_pic",
+            { imageUrl -> updateProfile(userId, binding.etFullName.text.toString().trim(), imageUrl) },
+            { error ->
+                Log.e("Cloudinary", "Upload error: ${error ?: "Unknown error"}")
+                showToast("Failed to upload new profile picture")
+            }
+        )
+    }
+
+    private fun updateProfile(userId: String, newFullName: String, newImageUrl: String?) {
+        val userUpdates = mutableMapOf<String, Any>("fullName" to newFullName)
+        newImageUrl?.let { userUpdates["profilePicUrl"] = it }
 
         firestore.collection("users").document(userId)
             .update(userUpdates)
             .addOnSuccessListener {
-                Toast.makeText(context, "Profile updated", Toast.LENGTH_SHORT).show()
+                showToast("Profile updated")
                 shouldUpdateProfilePicture = false
             }
             .addOnFailureListener {
-                Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                showToast("Failed to update profile")
             }
     }
 
     private fun pickImageFromGallery() {
         cameraLauncher.launch(null)
+    }
+
+    private fun signOut() {
+        firebaseAuth.signOut()
+        navigateToAuth()
+    }
+
+    private fun navigateToAuth() {
+        requireActivity().finish()
+        startActivity(Intent(requireContext(), AuthActivity::class.java))
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
