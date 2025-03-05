@@ -123,7 +123,6 @@ class MatchDetailsFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
                 onLocationRetrieved(location)
             }.addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
                 onLocationRetrieved(null)
             }
         } else {

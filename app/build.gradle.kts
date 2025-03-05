@@ -91,6 +91,9 @@ dependencies {
     implementation(libs.picasso)
     implementation(libs.cloudinary.cloudinary.android)
 
+    // Map
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+
     // Matches Api
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")

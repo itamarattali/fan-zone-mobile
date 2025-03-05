@@ -5,6 +5,10 @@
     <!-- Request permission for notifications (Required for Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
+    <!-- Request permission for location -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <!-- Request permission for notifications (Required for Android 13+) -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -22,6 +26,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+            <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyDpjRONzrD-Svuv9DbZiHJXqpH6WGai6bo" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
