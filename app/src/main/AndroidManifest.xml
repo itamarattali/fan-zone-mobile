@@ -28,7 +28,7 @@
             android:exported="true">
             <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyDpjRONzrD-Svuv9DbZiHJXqpH6WGai6bo" />
+                android:value="@string/google_api_key" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
