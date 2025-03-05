@@ -1,24 +1,16 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("androidx.navigation.safeargs.kotlin")
-    id("com.google.gms.google-services")
-    id("kotlin-kapt")
-}
-
-val localProperties = Properties().apply {
-    load(rootProject.file("local.properties").inputStream())
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "com.example.fan_zone"
+    namespace = "com.example.fanzone"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.fan_zone"
-        minSdk = 29
+        applicationId = "com.example.fanzone"
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -43,73 +35,34 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        compose = true
         viewBinding = true
-        buildConfig = true
-    }
-}
-
-androidComponents {
-    onVariants { variant ->
-        variant.buildConfigFields.put(
-            "CLOUDINARY_API_KEY",
-            com.android.build.api.variant.BuildConfigField(
-                "String",
-                "\"${localProperties["cloudinary_api_key"]}\"",
-                "API Key"
-            )
-        )
-        variant.buildConfigFields.put(
-            "CLOUDINARY_API_SECRET",
-            com.android.build.api.variant.BuildConfigField(
-                "String",
-                "\"${localProperties["cloudinary_api_secret"]}\"",
-                "API Secret"
-            )
-        )
-
     }
 }
 
 dependencies {
-    // Core Android Libraries
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4") // Use the latest version
+    implementation("com.google.android.material:material:1.10.0") // Make sure to use the latest version
+    implementation("androidx.recyclerview:recyclerview:1.3.0") // Use the latest version
+    implementation("com.google.android.material:material:1.9.0") // Already included for Material UI
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$2.0.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
+
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-
-    // Firebase Auth
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.firebase.firestore.ktx)
-
-    // Navigation
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
-
-    // Picasso
-    implementation(libs.picasso)
-    implementation(libs.cloudinary.cloudinary.android)
-
-    // Matches Api
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-
-    // Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.6.1")
-
-
-    // Location Provider
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-
-    // Testing
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
