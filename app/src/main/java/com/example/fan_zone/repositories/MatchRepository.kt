@@ -19,28 +19,28 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class MatchRepository(context: Context) {
 
     private val matchDao = MatchDatabase.getDatabase(context).matchDao()
 
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
     init {
-        fetchMatches() // Fetch matches from the API when the repository is initialized
+        fetchMatches()
     }
 
-    // Fetch matches from the API and insert them into the Room database
     private fun fetchMatches() {
         val apiService = RetrofitClient.instance
-        apiService.getMatches("2025-02-01", "2025-03-01")
+
+
+        val (startDate, endDate) = getDatesToFetch()
+        apiService.getMatches(startDate, endDate)
             .enqueue(object : Callback<String> {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
                     if (response.isSuccessful && response.body() != null) {
                         try {
                             val matches = parseMatches(response)
-                            // Insert matches into the database
                             CoroutineScope(Dispatchers.IO).launch {
                                 matchDao.insertMatches(matches)
                             }
@@ -59,37 +59,30 @@ class MatchRepository(context: Context) {
             })
     }
 
-    // Get matches by date from the Room database
     fun getMatchesByDate(date: Date): LiveData<List<Match>> {
         val (startMillis, endMillis) = getStartAndEndOfDayInMillis(date)
         return matchDao.getMatchesByDate(startMillis, endMillis)
     }
 
     fun getStartAndEndOfDayInMillis(date: Date): Pair<Long, Long> {
-        // Convert Date to LocalDateTime
         val localDateTime = date.toInstant()
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
 
-        // Get start of the day (00:00:00)
         val startOfDay = localDateTime.toLocalDate().atStartOfDay()
 
-        // Get end of the day (23:59:59.999999999)
         val endOfDay = localDateTime.toLocalDate().atTime(LocalTime.MAX)
 
-        // Convert LocalDateTime to Instant and then to milliseconds
         val startMillis = startOfDay.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val endMillis = endOfDay.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         return Pair(startMillis, endMillis)
     }
 
-    // Get a match by ID from the Room database
     fun getMatchById(matchId: Int): LiveData<Match> {
         return matchDao.getMatchById(matchId)
     }
 
-    // Parse the API response into a list of Match objects
     private fun parseMatches(response: Response<String>): MutableList<Match> {
         val jsonObject = JSONObject(response.body()!!)
         val jsonMatches: JSONArray = jsonObject.getJSONArray("matches")
@@ -113,5 +106,15 @@ class MatchRepository(context: Context) {
         }
 
         return matches
+    }
+
+    fun getDatesToFetch(): Pair<String, String> {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+        val today = LocalDate.now()
+        val startDate = today.minusMonths(1).format(formatter)
+        val endDate = today.plusMonths(1).format(formatter)
+
+        return Pair(startDate, endDate)
     }
 }

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.R
 import com.example.fan_zone.adapters.MatchListAdapter
@@ -28,18 +29,23 @@ class MatchesFeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        matchAdapter = MatchListAdapter(mutableListOf())
+        matchAdapter = MatchListAdapter(mutableListOf()) { match ->
+            val action = MatchesFeedFragmentDirections.actionMatchesFeedFragmentToMatchDetailsFragment(matchId = match.id.toString())
+            findNavController().navigate(action)
+        }
+
         binding.matchesList.layoutManager = LinearLayoutManager(requireContext())
         binding.matchesList.adapter = matchAdapter
 
         matchListViewModel.matches.observe(viewLifecycleOwner) { matches ->
-            if (!matches.isNullOrEmpty()){
+            if (!matches.isNullOrEmpty()) {
                 matchAdapter.updateMatches(matches)
-            } else matchAdapter.updateMatches(mutableListOf())
+            } else {
+                matchAdapter.updateMatches(mutableListOf())
+            }
         }
 
         setupDateSelector()
-
     }
 
     @SuppressLint("ResourceAsColor")
