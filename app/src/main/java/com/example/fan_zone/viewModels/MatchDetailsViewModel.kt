@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.switchMap
 import com.example.fan_zone.repositories.MatchRepository
 import com.example.fan_zone.repositories.PostRepository
 import com.example.fan_zone.models.Match
@@ -13,7 +14,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class MatchDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -23,8 +23,11 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
 
-    private val _match = MutableLiveData<Match?>()
-    val match: LiveData<Match?> get() = _match
+    private val _matchId = MutableLiveData<Int>()
+
+    val match: LiveData<Match> = _matchId.switchMap{ id ->
+        matchRepository.getMatchById(id)
+    }
 
     private val _popularPosts = MutableLiveData<List<Post>>()
     val popularPosts: LiveData<List<Post>> get() = _popularPosts
@@ -96,11 +99,9 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         ))
     }
 
-    fun getMatchDetails(matchId: Int) {
-        viewModelScope.launch {
-            _match.value = matchRepository.getMatchById(matchId).value
-            fetchPosts(matchId)
-        }
+    fun fetchMatchDetails(matchId: Int) {
+        _matchId.value = matchId
+        fetchPosts(matchId)
     }
 
     private fun fetchPosts(matchId: Int) {
