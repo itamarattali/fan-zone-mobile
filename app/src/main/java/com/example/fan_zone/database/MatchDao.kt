@@ -16,7 +16,7 @@ interface MatchDao {
     fun getMatchesByDate(startOfDay: Long, endOfDay: Long): LiveData<List<Match>>
 
     @Query("SELECT * FROM matches WHERE id = :matchId")
-    fun getMatchById(matchId: Int): LiveData<Match>
+    fun getMatchById(matchId: Int): LiveData<Match>?
 
     @Query("SELECT * FROM matches")
     fun getAllMatches(): LiveData<List<Match>>

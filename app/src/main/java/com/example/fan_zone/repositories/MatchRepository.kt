@@ -79,7 +79,7 @@ class MatchRepository(context: Context) {
         return Pair(startMillis, endMillis)
     }
 
-    fun getMatchById(matchId: Int): LiveData<Match> {
+    fun getMatchById(matchId: Int): LiveData<Match>? {
         return matchDao.getMatchById(matchId)
     }
 

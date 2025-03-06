@@ -20,8 +20,10 @@ import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.addTextChangedListener
+import com.example.fan_zone.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.squareup.picasso.Picasso
 import java.util.Date
 
 class MatchDetailsFragment : Fragment() {
@@ -52,13 +54,24 @@ class MatchDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Fetch match details
-        viewModel.getMatchDetails(args.matchId.toInt())
+        viewModel.fetchMatchDetails(args.matchId.toInt())
 
         // Observe match details
         viewModel.match.observe(viewLifecycleOwner) { match ->
             match?.let {
                 binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
                 binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+                binding.matchDetailsTextView.text = "Date: ${match.date}"
+
+                if (match.matchImage.isNotEmpty()) {
+                    Picasso.get()
+                        .load(match.matchImage)
+                        .fit()
+                        .centerCrop()
+                        .into(binding.matchImageView)
+                } else {
+                    binding.matchImageView.setImageResource(R.drawable.ic_matches)
+                }
             }
         }
 
@@ -123,7 +136,6 @@ class MatchDetailsFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
                 onLocationRetrieved(location)
             }.addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
                 onLocationRetrieved(null)
             }
         } else {
