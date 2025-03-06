@@ -61,7 +61,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
                 _userPosts.postValue(updatedUserPosts)
             } catch (e: Exception) {
-                _errorMessage.postValue("Failed to update post")
+                _errorMessage.postValue("Failed to edit post")
             }
         }
     }
