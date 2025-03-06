@@ -61,7 +61,7 @@ class MatchDetailsFragment : Fragment() {
     }
 
     private fun setupMatchDetailsObserver() {
-        viewModel.getMatchDetails(args.matchId.toInt())
+        viewModel.fetchMatchDetails(args.matchId.toInt())
         viewModel.match.observe(viewLifecycleOwner) { match ->
             match?.let { updateMatchDetails(it) }
         }
