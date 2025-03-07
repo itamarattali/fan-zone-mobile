@@ -20,6 +20,7 @@ import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.addTextChangedListener
+import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -53,6 +54,10 @@ class MatchDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.returnToFeed.setOnClickListener {
+            val action = MatchDetailsFragmentDirections.actionMatchDetailsFragmentToMatchesFeedFragment()
+            findNavController().navigate(action)
+        }
         // Fetch match details
         viewModel.fetchMatchDetails(args.matchId.toInt())
 

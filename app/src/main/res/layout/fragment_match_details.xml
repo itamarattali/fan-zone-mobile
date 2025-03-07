@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/returnToFeed"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:backgroundTint="@android:color/darker_gray"
+        android:icon="@android:drawable/ic_media_previous"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
     <!-- Match Image -->
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/matchImageView"
