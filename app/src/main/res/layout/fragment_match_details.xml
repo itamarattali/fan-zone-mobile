@@ -6,15 +6,16 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <!-- Back Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/returnToFeed"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:backgroundTint="@android:color/darker_gray"
-        android:icon="@android:drawable/ic_media_previous"
+        app:icon="@android:drawable/ic_menu_revert"
         android:padding="8dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Match Image -->
     <com.google.android.material.imageview.ShapeableImageView
@@ -24,7 +25,7 @@
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/returnToFeed"
         app:strokeColor="@color/primary"
         app:strokeWidth="2dp" />
 
@@ -49,18 +50,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/matchTitleTextView" />
 
-    <!-- Match Result -->
+    <!-- Match Result (Centered & Enlarged) -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/matchResultTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textSize="16sp"
+        android:layout_marginTop="12dp"
+        android:textSize="24sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/matchDetailsTextView" />
 
     <!-- Post Input Field -->
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/postEditLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Write your thoughts about the match..."
@@ -80,21 +84,7 @@
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Post Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/postButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Post"
-        android:enabled="false"
-        android:textColor="@android:color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="12dp" />
-
-
-    <!-- Your Posts Title -->
+    <!-- Your Posts Title (Moved Below Input Field) -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/yourPostsTitle"
         android:layout_width="wrap_content"
@@ -103,7 +93,7 @@
         android:text="Your Posts"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/yourPostsTitle" />
+        app:layout_constraintTop_toBottomOf="@id/postEditLayout" />
 
     <!-- RecyclerView for Your Posts -->
     <androidx.recyclerview.widget.RecyclerView
@@ -115,12 +105,12 @@
         app:layout_constraintTop_toBottomOf="@id/yourPostsTitle"
         tools:listitem="@layout/post_recycler_view_item" />
 
-    <!-- Popular Posts Title -->
+    <!-- Popular Posts Title (Now Below Your Posts) -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/popularPostsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:text="Popular Posts"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -135,5 +125,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/popularPostsTitle"
         tools:listitem="@layout/post_recycler_view_item" />
+
+    <!-- Post Button (Remains at Bottom) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/postButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Post"
+        android:enabled="false"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="12dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
