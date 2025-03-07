@@ -20,7 +20,9 @@ import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.addTextChangedListener
+import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.R
+import com.example.fan_zone.models.Match
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.squareup.picasso.Picasso
@@ -45,6 +47,7 @@ class MatchDetailsFragment : Fragment() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         setupClickListeners()
+        setupErrorMsgListener()
         observeViewModel()
         return binding.root
     }
@@ -53,29 +56,32 @@ class MatchDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Fetch match details
-        viewModel.fetchMatchDetails(args.matchId.toInt())
-
-        // Observe match details
-        viewModel.match.observe(viewLifecycleOwner) { match ->
-            match?.let {
-                binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
-                binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
-                binding.matchDetailsTextView.text = "Date: ${match.date}"
-
-                if (match.matchImage.isNotEmpty()) {
-                    Picasso.get()
-                        .load(match.matchImage)
-                        .fit()
-                        .centerCrop()
-                        .into(binding.matchImageView)
-                } else {
-                    binding.matchImageView.setImageResource(R.drawable.ic_matches)
-                }
-            }
+        binding.returnToFeed.setOnClickListener {
+            val action = MatchDetailsFragmentDirections.actionMatchDetailsFragmentToMatchesFeedFragment()
+            findNavController().navigate(action)
         }
+        setupMatchDetailsObserver()
+        setupAdapters()
+        setupRecyclerViews()
+        observePostData()
+    }
 
-        // Setup adapters
+    private fun setupMatchDetailsObserver() {
+        viewModel.fetchMatchDetails(args.matchId.toInt())
+        viewModel.match.observe(viewLifecycleOwner) { match ->
+            match?.let { updateMatchDetails(it) }
+        }
+    }
+
+    private fun setupRecyclerViews() {
+        binding.recyclerViewPopularPosts.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewPopularPosts.adapter = popularPostsAdapter
+
+        binding.recyclerViewYourPosts.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewYourPosts.adapter = userPostsAdapter
+    }
+
+    private fun setupAdapters() {
         popularPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
@@ -87,20 +93,34 @@ class MatchDetailsFragment : Fragment() {
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { post -> viewModel.updatePost(post) }
         )
+    }
 
-        binding.recyclerViewPopularPosts.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerViewPopularPosts.adapter = popularPostsAdapter
-
-        binding.recyclerViewYourPosts.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerViewYourPosts.adapter = userPostsAdapter
-
-        // Observe ViewModel for posts
+    private fun observePostData() {
         viewModel.popularPosts.observe(viewLifecycleOwner) { posts ->
             popularPostsAdapter.submitList(posts)
         }
 
         viewModel.userPosts.observe(viewLifecycleOwner) { posts ->
             userPostsAdapter.submitList(posts)
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateMatchDetails(match: Match) {
+        binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
+        binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+        binding.matchDetailsTextView.text = "Date: ${match.date}"
+
+        if (match.matchImage.isNotEmpty()) {
+            Picasso.get()
+                .load(match.matchImage)
+                .placeholder(R.drawable.ic_matches)
+                .error(R.drawable.ic_matches)
+                .fit()
+                .centerCrop()
+                .into(binding.matchImageView)
+        } else {
+            binding.matchImageView.setImageResource(R.drawable.ic_matches)
         }
     }
 
@@ -117,43 +137,50 @@ class MatchDetailsFragment : Fragment() {
         return currentUser?.displayName ?: currentUser?.email ?: "Unknown User"
     }
 
-    private fun checkLocationPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (!isGranted) {
+            if (isGranted) {
+                fetchUserLocation { location ->
+                    val content = binding.postEditText.text.toString().trim()
+                    createPost(content, args.matchId, location)
+                }
+            } else {
                 Toast.makeText(requireContext(), "Please enable location permissions in settings", Toast.LENGTH_SHORT).show()
             }
         }
 
     @SuppressLint("MissingPermission")
     private fun fetchUserLocation(onLocationRetrieved: (Location?) -> Unit) {
-        if (checkLocationPermission()) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
-                onLocationRetrieved(location)
-            }.addOnFailureListener {
-                onLocationRetrieved(null)
-            }
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    onLocationRetrieved(location)
+                }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+                    onLocationRetrieved(null)
+                }
         } else {
             requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    private fun createPost(content: String, matchId: String) {
-        fetchUserLocation { location ->
-            val newPost = Post(
-                username = getCurrentUser(),
-                content = content,
-                timePosted = Date(),
-                matchId = matchId,
-                location = location
-            )
-            viewModel.createPost(newPost)
+    private fun createPost(content: String, matchId: String, location: Location?) {
+        if (content.isEmpty()) {
+            Toast.makeText(requireContext(), "Post content cannot be empty", Toast.LENGTH_SHORT).show()
+            return
         }
+        val newPost = Post(
+            username = getCurrentUser(),
+            content = content,
+            timePosted = Date(),
+            matchId = matchId,
+            location = location
+        )
+
+        viewModel.createPost(newPost)
     }
 
     private fun setupClickListeners() {
@@ -164,7 +191,16 @@ class MatchDetailsFragment : Fragment() {
         binding.postButton.setOnClickListener {
             val content = binding.postEditText.text.toString().trim()
             val matchId = args.matchId
-            createPost(content, matchId)
+
+            fetchUserLocation { location ->
+                createPost(content, matchId, location)
+            }
+        }
+    }
+
+    private fun setupErrorMsgListener() {
+        viewModel.errorMessage.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), "Failed to create post. Try again.", Toast.LENGTH_SHORT).show()
         }
     }
 
