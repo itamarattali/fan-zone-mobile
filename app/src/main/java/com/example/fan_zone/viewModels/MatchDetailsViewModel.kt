@@ -77,7 +77,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
             // Update LiveData immediately
             updatePostInLists(post.copy(
-                likedUsers = post.likedUsers + userId,
+                likedUsersIds = post.likedUsersIds + userId,
                 likeCount = post.likeCount + 1
             )
         )
@@ -94,7 +94,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
         // Update LiveData immediately
         updatePostInLists(post.copy(
-            likedUsers = post.likedUsers.filter { it != userId },
+            likedUsersIds = post.likedUsersIds.filter { it != userId },
             likeCount = post.likeCount - 1
         ))
     }
