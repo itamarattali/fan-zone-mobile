@@ -8,23 +8,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fan_zone.R
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
+import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
-import com.google.firebase.auth.FirebaseAuth
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.addTextChangedListener
-import androidx.navigation.fragment.findNavController
-import com.example.fan_zone.R
-import com.example.fan_zone.models.Match
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import java.util.Date
 
@@ -134,7 +134,10 @@ class MatchDetailsFragment : Fragment() {
 
     private fun getCurrentUser(): String {
         val currentUser = auth.currentUser
-        return currentUser?.displayName ?: currentUser?.email ?: "Unknown User"
+        if (currentUser != null) {
+            return currentUser.uid
+        }
+        throw RuntimeException("Firebase currentUser is not defined!")
     }
 
     private val requestPermissionLauncher =
@@ -173,7 +176,7 @@ class MatchDetailsFragment : Fragment() {
             return
         }
         val newPost = Post(
-            username = getCurrentUser(),
+            userId = getCurrentUser(),
             content = content,
             timePosted = Date(),
             matchId = matchId,
