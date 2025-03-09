@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.R
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
+import com.example.fan_zone.models.GeoPoint
 import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
@@ -153,13 +154,15 @@ class MatchDetailsFragment : Fragment() {
         }
 
     @SuppressLint("MissingPermission")
-    private fun fetchUserLocation(onLocationRetrieved: (Location?) -> Unit) {
+    private fun fetchUserLocation(onLocationRetrieved: (GeoPoint?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    onLocationRetrieved(location)
+
+            fusedLocationClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location: Location? ->
+                    val geoPoint = location?.let { GeoPoint(it.latitude, it.longitude) }
+                    onLocationRetrieved(geoPoint)
                 }
                 .addOnFailureListener {
                     Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
@@ -170,7 +173,7 @@ class MatchDetailsFragment : Fragment() {
         }
     }
 
-    private fun createPost(content: String, matchId: String, location: Location?) {
+    private fun createPost(content: String, matchId: String, location: GeoPoint?) {
         if (content.isEmpty()) {
             Toast.makeText(requireContext(), "Post content cannot be empty", Toast.LENGTH_SHORT).show()
             return
