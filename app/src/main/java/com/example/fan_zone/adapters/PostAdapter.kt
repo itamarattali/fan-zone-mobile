@@ -57,6 +57,7 @@ class PostAdapter(
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+            var isEditing: Boolean = false
             // Fetch user data asynchronously using a coroutine
             CoroutineScope(Dispatchers.Main).launch {
                 val user = userRepository.getUserData(post.userId)
@@ -81,10 +82,14 @@ class PostAdapter(
             if (post.userId == userId) binding.editPostText.visibility = View.VISIBLE
             else binding.editPostText.visibility = View.GONE
 
+            fun toggleEditStatus(){
+                isEditing = isEditing.not()
+                toggleEditMode(isEditing)
+            }
             // Enable editing mode
             binding.editPostText.setOnClickListener {
                 binding.editPostEditText.setText(post.content)
-                toggleEditMode(true)
+                toggleEditStatus()
             }
 
             // Handle edit submission
@@ -94,12 +99,8 @@ class PostAdapter(
                     val newPost = post.copy(content = updatedContent)
                     onEditPost(newPost)
                     binding.contentTextView.text = updatedContent
-                    toggleEditMode(false)
+                    toggleEditStatus()
                 }
-            }
-
-            binding.cancelEditButton.setOnClickListener {
-                toggleEditMode(false)
             }
 
             // Dynamically toggle like/unlike button based on likedUsers
@@ -133,7 +134,8 @@ class PostAdapter(
             binding.contentTextView.visibility = if (isEditing) View.GONE else View.VISIBLE
             binding.editPostContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
             binding.editActionsContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
-            binding.editPostText.visibility = if (isEditing) View.GONE else View.VISIBLE
+            binding.editPostText.text = if (isEditing) "cancel edit" else "Edit post"
+            binding.submitEditButton.visibility = if (isEditing) View.VISIBLE else View.GONE
         }
     }
 }

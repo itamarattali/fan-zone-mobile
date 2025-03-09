@@ -77,17 +77,6 @@
             android:gravity="end"
             android:layout_marginTop="5dp">
 
-            <!-- Cancel Edit Button (Only Shown During Editing) -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/cancelEditButton"
-                style="@style/Widget.MaterialComponents.Button.Icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:icon="@drawable/ic_cancel"
-                android:text=""
-                android:visibility="gone"
-                app:backgroundTint="@color/gray" />
-
             <!-- Submit Edit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitEditButton"
