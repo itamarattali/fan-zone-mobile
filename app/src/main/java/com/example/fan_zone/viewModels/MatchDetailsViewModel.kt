@@ -71,21 +71,21 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update(
-            "likedUsersIds", FieldValue.arrayUnion(userId),
+            "likedUserIds", FieldValue.arrayUnion(userId),
         )
 
         // Update LiveData immediately
-        updatePostInLists(post.copy(likedUsersIds = post.likedUsersIds + userId))
+        updatePostInLists(post.copy(likedUserIds = post.likedUserIds + userId))
     }
 
     fun unlikePost(post: Post) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
-        postRef.update("likedUsersIds", FieldValue.arrayRemove(userId))
+        postRef.update("likedUserIds", FieldValue.arrayRemove(userId))
 
         // Update LiveData immediately
-        updatePostInLists(post.copy(likedUsersIds = post.likedUsersIds.filter { it != userId }))
+        updatePostInLists(post.copy(likedUserIds = post.likedUserIds.filter { it != userId }))
     }
 
     fun fetchMatchDetails(matchId: Int) {
@@ -99,7 +99,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
             _popularPosts.value =
-                posts.filter { it.userId != currentUserId }.sortedByDescending { it.likedUsersIds.size }
+                posts.filter { it.userId != currentUserId }.sortedByDescending { it.likedUserIds.size }
             _userPosts.value = posts.filter { it.userId == currentUserId }
         }
     }

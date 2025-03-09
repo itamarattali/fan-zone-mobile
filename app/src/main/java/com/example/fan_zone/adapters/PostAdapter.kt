@@ -54,7 +54,7 @@ class PostAdapter(
         ) {
             binding.usernameTextView.text = post.userId
             binding.contentTextView.text = post.content
-            binding.likeCountTextView.text = "${post.likedUsersIds.size} likes"
+            binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
@@ -103,7 +103,7 @@ class PostAdapter(
 
             // Handle like/unlike click
             binding.likeIcon.setOnClickListener {
-                if (post.likedUsersIds.contains(userId)) {
+                if (post.likedUserIds.contains(userId)) {
                     onUnlikeClicked(post)
                 } else {
                     onLikeClicked(post)
@@ -114,7 +114,7 @@ class PostAdapter(
         @SuppressLint("SetTextI18n")
         private fun updateLikeUI(post: Post, userId: String?) {
             // Check if user has liked the post
-            val isLiked = userId != null && post.likedUsersIds.contains(userId)
+            val isLiked = userId != null && post.likedUserIds.contains(userId)
 
             // Show correct like/unlike icon
             binding.likeIcon.setImageResource(
@@ -122,7 +122,7 @@ class PostAdapter(
             )
 
             // Update like count dynamically
-            binding.likeCountTextView.text = "${post.likedUsersIds.size} likes"
+            binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
         }
 
         private fun toggleEditMode(isEditing: Boolean) {

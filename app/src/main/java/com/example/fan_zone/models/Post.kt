@@ -9,7 +9,7 @@ data class Post(
     val content: String = "",
     var location: GeoPoint? = null,
     val matchId: String = "",
-    val likedUsersIds: List<String> = emptyList()
+    val likedUserIds: List<String> = emptyList()
 ) {
     constructor() : this("", "", Date(), "", null, "", emptyList())
 }
