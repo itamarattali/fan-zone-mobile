@@ -98,11 +98,17 @@ class MatchRepository(context: Context) {
             val awayTeamDisplayName = jsonObject.getJSONObject("awayTeam").getString("shortName").toString()
             val homeTeamDisplayName = homeTeam.getString("shortName").toString()
             val homeTeamImage = homeTeam.getString("crest").toString()
-            // val score = jsonObject.getJSONObject("score").getJSONObject("fullTime")
-            // val homeTeamGoals = score.getInt("home")
-            // val awayTeamGoals = score.getInt("away")
+            val score = jsonObject.getJSONObject("score")
+            var homeTeamGoals: Int? = null
+            var awayTeamGoals: Int? = null
+            val winner = score.getString("winner")
+            if (winner.toString() != "null"){
+                val fullTime = score.getJSONObject("fullTime")
+                homeTeamGoals = fullTime.getInt("home")
+                awayTeamGoals = fullTime.getInt("away")
+            }
 
-            matches.add(Match(id, utcDate, homeTeamDisplayName, awayTeamDisplayName, homeTeamImage, 0, 0))
+            matches.add(Match(id, utcDate, homeTeamDisplayName, awayTeamDisplayName, homeTeamImage, homeTeamGoals, awayTeamGoals))
         }
 
         return matches

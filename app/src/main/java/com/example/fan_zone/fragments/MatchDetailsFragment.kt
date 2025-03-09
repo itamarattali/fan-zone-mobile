@@ -109,7 +109,12 @@ class MatchDetailsFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateMatchDetails(match: Match) {
         binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
-        binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+        if (match.homeTeamGoals != null){
+            binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+        }else{
+            binding.matchResultTextView.visibility = View.GONE
+        }
+
         binding.matchDetailsTextView.text = "Date: ${match.date}"
 
         if (match.matchImage.isNotEmpty()) {
