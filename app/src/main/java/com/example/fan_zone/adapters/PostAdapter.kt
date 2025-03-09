@@ -52,7 +52,6 @@ class PostAdapter(
             onEditPost: (Post) -> Unit,
             userRepository: UserRepository
         ) {
-            binding.usernameTextView.text = post.userId
             binding.contentTextView.text = post.content
             binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
 
@@ -65,7 +64,12 @@ class PostAdapter(
                 if (user != null) {
                     // Update the UI with the fetched user data
                     binding.usernameTextView.text = user.fullName
-                    Picasso.get().load(user.profilePicUrl).into(binding.profileImageView)
+//                    Picasso.get()
+//                        .load(user.profilePicUrl)
+//                        .placeholder(R.drawable.ic_user_placeholder) // shown while loading
+//                        .error(R.drawable.ic_user_placeholder) // shown if URL fails to load
+//                        .into(binding.profileImageView)
+
                 } else {
                     // Handle case where user is not found
                     binding.usernameTextView.text = "Unknown User"
