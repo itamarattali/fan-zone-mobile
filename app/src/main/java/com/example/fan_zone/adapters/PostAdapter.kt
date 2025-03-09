@@ -57,7 +57,7 @@ class PostAdapter(
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-            var isEditing: Boolean = false
+            var isEditing = false
             // Fetch user data asynchronously using a coroutine
             CoroutineScope(Dispatchers.Main).launch {
                 val user = userRepository.getUserData(post.userId)
@@ -65,11 +65,11 @@ class PostAdapter(
                 if (user != null) {
                     // Update the UI with the fetched user data
                     binding.usernameTextView.text = user.fullName
-//                    Picasso.get()
-//                        .load(user.profilePicUrl)
-//                        .placeholder(R.drawable.ic_user_placeholder) // shown while loading
-//                        .error(R.drawable.ic_user_placeholder) // shown if URL fails to load
-//                        .into(binding.profileImageView)
+                    if (user.profilePicUrl != ""){
+                        Picasso.get()
+                            .load(user.profilePicUrl)
+                            .into(binding.profileImageView)
+                    }
 
                 } else {
                     // Handle case where user is not found
