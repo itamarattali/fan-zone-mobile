@@ -54,7 +54,7 @@ class PostAdapter(
         ) {
             binding.usernameTextView.text = post.userId
             binding.contentTextView.text = post.content
-            binding.likeCountTextView.text = "${post.likeCount} likes"
+            binding.likeCountTextView.text = "${post.likedUsersIds.size} likes"
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
@@ -122,7 +122,7 @@ class PostAdapter(
             )
 
             // Update like count dynamically
-            binding.likeCountTextView.text = "${post.likeCount} likes"
+            binding.likeCountTextView.text = "${post.likedUsersIds.size} likes"
         }
 
         private fun toggleEditMode(isEditing: Boolean) {
