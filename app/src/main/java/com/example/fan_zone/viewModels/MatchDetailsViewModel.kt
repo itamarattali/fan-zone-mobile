@@ -71,7 +71,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update(
-            "likedUsers", FieldValue.arrayUnion(userId),
+            "likedUsersIds", FieldValue.arrayUnion(userId),
         )
 
         // Update LiveData immediately
@@ -82,7 +82,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
-        postRef.update("likedUsers", FieldValue.arrayRemove(userId))
+        postRef.update("likedUsersIds", FieldValue.arrayRemove(userId))
 
         // Update LiveData immediately
         updatePostInLists(post.copy(likedUsersIds = post.likedUsersIds.filter { it != userId }))
