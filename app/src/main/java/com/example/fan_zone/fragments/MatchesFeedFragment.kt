@@ -31,8 +31,8 @@ class MatchesFeedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         matchAdapter = MatchListAdapter(mutableListOf()) { match ->
-            val action = MatchesFeedFragmentDirections.actionMatchesFeedFragmentToMatchDetailsFragment(matchId = match.id.toString())
-            findNavController().navigate(action)
+//            val action = MatchesFeedFragmentDirections.actionMatchesFeedFragmentToMatchDetailsFragment(matchId = match.id.toString())
+//            findNavController().navigate(action)
         }
 
         binding.matchesList.layoutManager = LinearLayoutManager(requireContext())

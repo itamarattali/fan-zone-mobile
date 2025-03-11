@@ -11,7 +11,7 @@
 
     <fragment
         android:id="@+id/matchesFeedFragment"
-        android:name="com.example.fan_zone.fragments.MatchesFeedFragment"
+        android:name="com.example.fan_zone.fragments.MapFragment"
         android:label="Matches Feed">
         <action
             android:id="@+id/action_matchesFeedFragment_to_matchDetailsFragment"
