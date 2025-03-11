@@ -25,5 +25,8 @@
         <argument
             android:name="matchId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_matchDetailsFragment_to_matchesFeedFragment"
+            app:destination="@id/matchesFeedFragment" />
     </fragment>
 </navigation>

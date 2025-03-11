@@ -1,16 +1,15 @@
 package com.example.fan_zone.models
 
-import android.location.Location
 import java.util.Date
 
 data class Post(
     val id: String = "",
-    val username: String = "",
-    val profileImageUrl: String? = null,
+    val userId: String = "",
     val timePosted: Date = Date(),
     val content: String = "",
-    var likeCount: Int = 0,
-    var location: Location?,
+    var location: GeoPoint? = null,
     val matchId: String = "",
-    val likedUsers: List<String> = emptyList()
-)
+    val likedUserIds: List<String> = emptyList()
+) {
+    constructor() : this("", "", Date(), "", null, "", emptyList())
+}

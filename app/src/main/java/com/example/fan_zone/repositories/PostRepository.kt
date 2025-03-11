@@ -31,7 +31,7 @@ class PostRepository {
     suspend fun getPostsByMatchID(matchId: Int): List<Post> {
         return try {
             val snapshot = postCollection
-                .whereEqualTo("matchId", matchId)
+                .whereEqualTo("matchId", matchId.toString())
                 .orderBy("timePosted", Query.Direction.DESCENDING)
                 .get()
                 .await()

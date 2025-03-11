@@ -14,6 +14,7 @@ import com.example.fan_zone.R
 import com.example.fan_zone.adapters.MatchListAdapter
 import com.example.fan_zone.databinding.FragmentMatchesFeedBinding
 import com.example.fan_zone.viewModels.MatchListViewModel
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MatchesFeedFragment : Fragment() {
@@ -40,8 +41,10 @@ class MatchesFeedFragment : Fragment() {
         matchListViewModel.matches.observe(viewLifecycleOwner) { matches ->
             if (!matches.isNullOrEmpty()) {
                 matchAdapter.updateMatches(matches)
+                binding.noMatchesText.visibility = View.GONE
             } else {
                 matchAdapter.updateMatches(mutableListOf())
+                binding.noMatchesText.visibility = View.VISIBLE
             }
         }
 
@@ -52,13 +55,15 @@ class MatchesFeedFragment : Fragment() {
     private fun setupDateSelector() {
         val dateContainer = binding.dateContainer
         val scrollView = binding.dateSelectorScroll
+        val selectedDateText = binding.selectedDateText
+
         val calendar = Calendar.getInstance()
 
         calendar.add(Calendar.DAY_OF_YEAR, -3)
 
-        var selectedButton: Button? = null
         var todayButton: Button? = null
         var isTodayCentered = false
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
         for (i in -3..3) {
             val button = Button(requireContext()).apply {
@@ -66,16 +71,11 @@ class MatchesFeedFragment : Fragment() {
                 val dayOfWeek = android.text.format.DateFormat.format("EEE", date).toString()
                 val formattedDate = android.text.format.DateFormat.format("dd", date).toString()
                 text = "$formattedDate\n$dayOfWeek"
-                setTextAppearance(R.style.DateButtonStyle)
 
                 setOnClickListener {
-                    selectedButton?.setTextAppearance(R.style.DateButtonStyle)
-                    setTextAppearance(R.style.PickedDateButtonStyle)
-
-                    selectedButton = this
-
                     scrollToCenter(this)
                     matchListViewModel.loadMatchesForDate(date)
+                    selectedDateText.text = dateFormat.format(date)
                 }
             }
 
@@ -83,9 +83,8 @@ class MatchesFeedFragment : Fragment() {
 
             if (calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR) &&
                 calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)) {
-                selectedButton = button
                 todayButton = button
-                button.setTextAppearance(R.style.PickedDateButtonStyle)
+                selectedDateText.text = dateFormat.format(calendar.time)
             }
 
             calendar.add(Calendar.DAY_OF_YEAR, 1)

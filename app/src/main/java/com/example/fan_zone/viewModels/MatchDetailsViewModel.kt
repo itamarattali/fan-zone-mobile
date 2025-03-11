@@ -4,12 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.switchMap
-import com.example.fan_zone.repositories.MatchRepository
-import com.example.fan_zone.repositories.PostRepository
+import androidx.lifecycle.viewModelScope
 import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
+import com.example.fan_zone.repositories.MatchRepository
+import com.example.fan_zone.repositories.PostRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -71,32 +71,21 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update(
-            "likedUsers", FieldValue.arrayUnion(userId),
-            "likeCount", FieldValue.increment(1)
+            "likedUserIds", FieldValue.arrayUnion(userId),
         )
 
-            // Update LiveData immediately
-            updatePostInLists(post.copy(
-                likedUsers = post.likedUsers + userId,
-                likeCount = post.likeCount + 1
-            )
-        )
+        // Update LiveData immediately
+        updatePostInLists(post.copy(likedUserIds = post.likedUserIds + userId))
     }
 
     fun unlikePost(post: Post) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
-        postRef.update(
-            "likedUsers", FieldValue.arrayRemove(userId),
-            "likeCount", FieldValue.increment(-1)
-        )
+        postRef.update("likedUserIds", FieldValue.arrayRemove(userId))
 
         // Update LiveData immediately
-        updatePostInLists(post.copy(
-            likedUsers = post.likedUsers.filter { it != userId },
-            likeCount = post.likeCount - 1
-        ))
+        updatePostInLists(post.copy(likedUserIds = post.likedUserIds.filter { it != userId }))
     }
 
     fun fetchMatchDetails(matchId: Int) {
@@ -108,9 +97,10 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             val posts = postRepository.getPostsByMatchID(matchId)
 
-            _popularPosts.value = posts.sortedByDescending { it.likeCount } // Most liked first
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-            _userPosts.value = posts.filter { it.id == currentUserId }
+            _popularPosts.value =
+                posts.filter { it.userId != currentUserId }.sortedByDescending { it.likedUserIds.size }
+            _userPosts.value = posts.filter { it.userId == currentUserId }
         }
     }
 
