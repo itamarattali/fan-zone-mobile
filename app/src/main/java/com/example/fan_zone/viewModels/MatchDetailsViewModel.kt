@@ -35,11 +35,13 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     private val _userPosts = MutableLiveData<List<Post>>()
     val userPosts: LiveData<List<Post>> get() = _userPosts
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
     fun createPost(post: Post) {
         viewModelScope.launch {
             try {
                 val savedPost = postRepository.createPost(post)
-
                 val updatedUserPosts = _userPosts.value.orEmpty().toMutableList()
                 updatedUserPosts.add(0, savedPost)
                 _userPosts.postValue(updatedUserPosts)
@@ -49,31 +51,32 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun updatePost(post: Post) {
+        viewModelScope.launch {
+            _isLoading.postValue(true)
+            try {
+                postRepository.updatePost(post.id, post.content)
+                val updatedUserPosts = _userPosts.value?.map { if (it.id == post.id) post.copy() else it } ?: emptyList()
+                _userPosts.postValue(updatedUserPosts)
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to edit post")
+            } finally {
+                _isLoading.postValue(false)
+            }
+        }
+    }
+
     fun deletePost(post: Post) {
         viewModelScope.launch {
+            _isLoading.postValue(true)
             try {
                 postRepository.deletePost(post.id)
                 _userPosts.postValue(_userPosts.value?.filter { it.id != post.id })
                 _popularPosts.postValue(_popularPosts.value?.filter { it.id != post.id })
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to delete post")
-            }
-        }
-    }
-
-    fun updatePost(post: Post) {
-        viewModelScope.launch {
-            try {
-                postRepository.updatePost(post.id, post.content)
-
-                // Manually update the LiveData list to reflect the edited post
-                val updatedUserPosts = _userPosts.value?.map {
-                    if (it.id == post.id) post.copy() else it
-                } ?: emptyList()
-
-                _userPosts.postValue(updatedUserPosts)
-            } catch (e: Exception) {
-                _errorMessage.postValue("Failed to edit post")
+            } finally {
+                _isLoading.postValue(false)
             }
         }
     }
@@ -86,7 +89,6 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
             "likedUserIds", FieldValue.arrayUnion(userId),
         )
 
-        // Update LiveData immediately
         updatePostInLists(post.copy(likedUserIds = post.likedUserIds + userId))
     }
 
@@ -96,7 +98,6 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
         postRef.update("likedUserIds", FieldValue.arrayRemove(userId))
 
-        // Update LiveData immediately
         updatePostInLists(post.copy(likedUserIds = post.likedUserIds.filter { it != userId }))
     }
 
@@ -114,6 +115,10 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
                 posts.filter { it.userId != currentUserId }.sortedByDescending { it.likedUserIds.size }
             _userPosts.value = posts.filter { it.userId == currentUserId }
         }
+    }
+
+    fun setLoading(isLoading: Boolean) {
+        _isLoading.value = isLoading
     }
 
     private fun updatePostInLists(updatedPost: Post) {

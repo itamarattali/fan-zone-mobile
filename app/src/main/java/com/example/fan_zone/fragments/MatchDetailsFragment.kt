@@ -40,6 +40,7 @@ class MatchDetailsFragment : Fragment() {
     private lateinit var popularPostsAdapter: PostAdapter
     private lateinit var userPostsAdapter: PostAdapter
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -65,6 +66,7 @@ class MatchDetailsFragment : Fragment() {
         setupAdapters()
         setupRecyclerViews()
         observePostData()
+        observeLoadingState()
     }
 
     private fun setupMatchDetailsObserver() {
@@ -140,6 +142,13 @@ class MatchDetailsFragment : Fragment() {
         }
     }
 
+    private fun observeLoadingState() {
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
     private fun getCurrentUser(): String {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -205,10 +214,14 @@ class MatchDetailsFragment : Fragment() {
             val content = binding.postEditText.text.toString().trim()
             val matchId = args.matchId
 
+            viewModel.setLoading(true)
             fetchUserLocation { location ->
                 createPost(content, matchId, location)
+                viewModel.setLoading(false)
             }
+
         }
+
     }
 
     private fun setupErrorMsgListener() {
