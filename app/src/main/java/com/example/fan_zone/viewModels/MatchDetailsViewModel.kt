@@ -49,6 +49,18 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun deletePost(post: Post) {
+        viewModelScope.launch {
+            try {
+                postRepository.deletePost(post.id)
+                _userPosts.postValue(_userPosts.value?.filter { it.id != post.id })
+                _popularPosts.postValue(_popularPosts.value?.filter { it.id != post.id })
+            } catch (e: Exception) {
+                _errorMessage.postValue("Failed to delete post")
+            }
+        }
+    }
+
     fun updatePost(post: Post) {
         viewModelScope.launch {
             try {

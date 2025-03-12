@@ -20,6 +20,15 @@ class PostRepository {
         }
     }
 
+    suspend fun deletePost(postId: String) {
+        try {
+            postCollection.document(postId).delete().await()
+        } catch (e: Exception) {
+            throw Exception("Error deleting post: ${e.message}")
+        }
+    }
+
+
     suspend fun updatePost(postId: String, newContent: String) {
         try {
             val postRef = postCollection.document(postId)

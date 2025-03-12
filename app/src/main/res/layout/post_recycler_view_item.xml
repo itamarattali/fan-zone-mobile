@@ -129,5 +129,15 @@
             android:textSize="12sp"
             android:visibility="gone"
             android:layout_marginTop="5dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/deletePostText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete Post"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="5dp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

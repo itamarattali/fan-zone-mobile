@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
 class PostAdapter(
     private val onLikeClicked: (Post) -> Unit,
     private val onUnlikeClicked: (Post) -> Unit,
-    private val onEditPost: (Post) -> Unit
+    private val onEditPost: (Post) -> Unit,
+    private val onDeletePost: (Post) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private val posts = mutableListOf<Post>()
@@ -37,7 +38,7 @@ class PostAdapter(
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        holder.bind(posts[position], onLikeClicked, onUnlikeClicked, onEditPost, userRepository)
+        holder.bind(posts[position], onLikeClicked, onUnlikeClicked, onEditPost, onDeletePost, userRepository)
     }
 
     override fun getItemCount() = posts.size
@@ -50,6 +51,7 @@ class PostAdapter(
             onLikeClicked: (Post) -> Unit,
             onUnlikeClicked: (Post) -> Unit,
             onEditPost: (Post) -> Unit,
+            onDeletePost: (Post) -> Unit,
             userRepository: UserRepository
         ) {
             binding.contentTextView.text = post.content
@@ -79,8 +81,14 @@ class PostAdapter(
             }
 
             // Show Edit Post link only for post author
-            if (post.userId == userId) binding.editPostText.visibility = View.VISIBLE
-            else binding.editPostText.visibility = View.GONE
+            if (post.userId == userId) {
+                binding.editPostText.visibility = View.VISIBLE
+                binding.deletePostText.visibility = View.VISIBLE
+            }
+            else {
+                binding.editPostText.visibility = View.GONE
+                binding.deletePostText.visibility = View.GONE
+            }
 
             fun toggleEditStatus(){
                 isEditing = isEditing.not()
@@ -92,6 +100,9 @@ class PostAdapter(
                 toggleEditStatus()
             }
 
+            binding.deletePostText.setOnClickListener {
+                onDeletePost(post)
+            }
             // Handle edit submission
             binding.submitEditButton.setOnClickListener {
                 val updatedContent = binding.editPostEditText.text.toString().trim()

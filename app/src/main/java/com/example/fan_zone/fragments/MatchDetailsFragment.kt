@@ -86,13 +86,15 @@ class MatchDetailsFragment : Fragment() {
         popularPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) }
+            onEditPost = { post -> viewModel.updatePost(post) },
+            onDeletePost = { post -> viewModel.deletePost(post) }
         )
 
         userPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) }
+            onEditPost = { post -> viewModel.updatePost(post) },
+            onDeletePost = { post -> viewModel.deletePost(post) }
         )
     }
 
