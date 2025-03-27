@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Fanzone"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDpjRONzrD-Svuv9DbZiHJXqpH6WGai6bo" />
         <activity
             android:name=".SplashActivity"
             android:exported="true">

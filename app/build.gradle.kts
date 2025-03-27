@@ -44,6 +44,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
         buildConfig = true
     }
 }
@@ -66,7 +67,14 @@ androidComponents {
                 "API Secret"
             )
         )
-
+        variant.buildConfigFields.put(
+            "GOOGLE_API_KEY",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["google_api_key"]}\"",
+                "Google Api Key"
+            )
+        )
     }
 }
 
@@ -90,6 +98,9 @@ dependencies {
     // Picasso
     implementation(libs.picasso)
     implementation(libs.cloudinary.cloudinary.android)
+
+    // Map
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
 
     // Matches Api
     implementation(libs.retrofit)

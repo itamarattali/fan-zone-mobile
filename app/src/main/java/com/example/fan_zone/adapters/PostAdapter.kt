@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
 class PostAdapter(
     private val onLikeClicked: (Post) -> Unit,
     private val onUnlikeClicked: (Post) -> Unit,
-    private val onEditPost: (Post) -> Unit
+    private val onEditPost: (Post) -> Unit,
+    private val onDeletePost: (Post) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private val posts = mutableListOf<Post>()
@@ -37,7 +38,7 @@ class PostAdapter(
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        holder.bind(posts[position], onLikeClicked, onUnlikeClicked, onEditPost, userRepository)
+        holder.bind(posts[position], onLikeClicked, onUnlikeClicked, onEditPost, onDeletePost, userRepository)
     }
 
     override fun getItemCount() = posts.size
@@ -50,14 +51,15 @@ class PostAdapter(
             onLikeClicked: (Post) -> Unit,
             onUnlikeClicked: (Post) -> Unit,
             onEditPost: (Post) -> Unit,
+            onDeletePost: (Post) -> Unit,
             userRepository: UserRepository
         ) {
-            binding.usernameTextView.text = post.userId
             binding.contentTextView.text = post.content
-            binding.likeCountTextView.text = "${post.likeCount} likes"
+            binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+            var isEditing = false
             // Fetch user data asynchronously using a coroutine
             CoroutineScope(Dispatchers.Main).launch {
                 val user = userRepository.getUserData(post.userId)
@@ -65,7 +67,12 @@ class PostAdapter(
                 if (user != null) {
                     // Update the UI with the fetched user data
                     binding.usernameTextView.text = user.fullName
-                    Picasso.get().load(user.profilePicUrl).into(binding.profileImageView)
+                    if (user.profilePicUrl != ""){
+                        Picasso.get()
+                            .load(user.profilePicUrl)
+                            .into(binding.profileImageView)
+                    }
+
                 } else {
                     // Handle case where user is not found
                     binding.usernameTextView.text = "Unknown User"
@@ -74,15 +81,28 @@ class PostAdapter(
             }
 
             // Show Edit Post link only for post author
-            if (post.userId == userId) binding.editPostText.visibility = View.VISIBLE
-            else binding.editPostText.visibility = View.GONE
+            if (post.userId == userId) {
+                binding.editPostText.visibility = View.VISIBLE
+                binding.deletePostText.visibility = View.VISIBLE
+            }
+            else {
+                binding.editPostText.visibility = View.GONE
+                binding.deletePostText.visibility = View.GONE
+            }
 
+            fun toggleEditStatus(){
+                isEditing = isEditing.not()
+                toggleEditMode(isEditing)
+            }
             // Enable editing mode
             binding.editPostText.setOnClickListener {
                 binding.editPostEditText.setText(post.content)
-                toggleEditMode(true)
+                toggleEditStatus()
             }
 
+            binding.deletePostText.setOnClickListener {
+                onDeletePost(post)
+            }
             // Handle edit submission
             binding.submitEditButton.setOnClickListener {
                 val updatedContent = binding.editPostEditText.text.toString().trim()
@@ -90,12 +110,8 @@ class PostAdapter(
                     val newPost = post.copy(content = updatedContent)
                     onEditPost(newPost)
                     binding.contentTextView.text = updatedContent
-                    toggleEditMode(false)
+                    toggleEditStatus()
                 }
-            }
-
-            binding.cancelEditButton.setOnClickListener {
-                toggleEditMode(false)
             }
 
             // Dynamically toggle like/unlike button based on likedUsers
@@ -103,7 +119,7 @@ class PostAdapter(
 
             // Handle like/unlike click
             binding.likeIcon.setOnClickListener {
-                if (post.likedUsersIds.contains(userId)) {
+                if (post.likedUserIds.contains(userId)) {
                     onUnlikeClicked(post)
                 } else {
                     onLikeClicked(post)
@@ -114,7 +130,7 @@ class PostAdapter(
         @SuppressLint("SetTextI18n")
         private fun updateLikeUI(post: Post, userId: String?) {
             // Check if user has liked the post
-            val isLiked = userId != null && post.likedUsersIds.contains(userId)
+            val isLiked = userId != null && post.likedUserIds.contains(userId)
 
             // Show correct like/unlike icon
             binding.likeIcon.setImageResource(
@@ -122,14 +138,15 @@ class PostAdapter(
             )
 
             // Update like count dynamically
-            binding.likeCountTextView.text = "${post.likeCount} likes"
+            binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
         }
 
         private fun toggleEditMode(isEditing: Boolean) {
             binding.contentTextView.visibility = if (isEditing) View.GONE else View.VISIBLE
             binding.editPostContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
             binding.editActionsContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
-            binding.editPostText.visibility = if (isEditing) View.GONE else View.VISIBLE
+            binding.editPostText.text = if (isEditing) "cancel edit" else "Edit post"
+            binding.submitEditButton.visibility = if (isEditing) View.VISIBLE else View.GONE
         }
     }
 }

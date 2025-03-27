@@ -9,15 +9,25 @@ class PostRepository {
     private val db = FirebaseFirestore.getInstance()
     private val postCollection = db.collection("posts")
 
-    suspend fun createPost(post: Post) {
+    suspend fun createPost(post: Post): Post {
         try {
             val postId: String = postCollection.document().id
             val newPost: Post = post.copy(id = postId)
             postCollection.document(postId).set(newPost).await()
+            return newPost
         } catch (e: Exception) {
             throw Exception("Error creating post: ${e.message}")
         }
     }
+
+    suspend fun deletePost(postId: String) {
+        try {
+            postCollection.document(postId).delete().await()
+        } catch (e: Exception) {
+            throw Exception("Error deleting post: ${e.message}")
+        }
+    }
+
 
     suspend fun updatePost(postId: String, newContent: String) {
         try {

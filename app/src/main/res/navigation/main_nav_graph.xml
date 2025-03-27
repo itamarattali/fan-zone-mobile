@@ -19,6 +19,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.fan_zone.fragments.MapFragment"
+        android:label="Map">
+    </fragment>
+
+    <fragment
         android:id="@+id/matchDetailsFragment"
         android:name="com.example.fan_zone.fragments.MatchDetailsFragment"
         android:label="Match Details">

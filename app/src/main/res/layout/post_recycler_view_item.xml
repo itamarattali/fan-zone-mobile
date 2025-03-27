@@ -13,13 +13,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <!-- User Info Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingBottom="8dp"
             android:gravity="center_vertical">
 
             <com.google.android.material.imageview.ShapeableImageView
@@ -55,6 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:padding="4dp"
             app:boxStrokeColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -75,19 +78,8 @@
             android:orientation="horizontal"
             android:visibility="gone"
             android:gravity="end"
-            android:layout_marginTop="5dp">
-
-            <!-- Cancel Edit Button (Only Shown During Editing) -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/cancelEditButton"
-                style="@style/Widget.MaterialComponents.Button.Icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:icon="@drawable/ic_cancel"
-                android:text=""
-                android:visibility="gone"
-                app:backgroundTint="@color/gray" />
-
+            android:layout_marginTop="5dp"
+            android:paddingTop="4dp">
             <!-- Submit Edit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitEditButton"
@@ -134,6 +126,16 @@
             android:layout_height="wrap_content"
             android:text="Edit Post"
             android:textColor="@color/blue"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="5dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/deletePostText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete Post"
+            android:textColor="@android:color/holo_red_dark"
             android:textSize="12sp"
             android:visibility="gone"
             android:layout_marginTop="5dp" />

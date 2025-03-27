@@ -40,6 +40,7 @@ class MatchDetailsFragment : Fragment() {
     private lateinit var popularPostsAdapter: PostAdapter
     private lateinit var userPostsAdapter: PostAdapter
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,13 +59,15 @@ class MatchDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.returnToFeed.setOnClickListener {
-            val action = MatchDetailsFragmentDirections.actionMatchDetailsFragmentToMatchesFeedFragment()
+            val action =
+                MatchDetailsFragmentDirections.actionMatchDetailsFragmentToMatchesFeedFragment()
             findNavController().navigate(action)
         }
         setupMatchDetailsObserver()
         setupAdapters()
         setupRecyclerViews()
         observePostData()
+        observeLoadingState()
     }
 
     private fun setupMatchDetailsObserver() {
@@ -86,13 +89,15 @@ class MatchDetailsFragment : Fragment() {
         popularPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) }
+            onEditPost = { post -> viewModel.updatePost(post) },
+            onDeletePost = { post -> viewModel.deletePost(post) }
         )
 
         userPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) }
+            onEditPost = { post -> viewModel.updatePost(post) },
+            onDeletePost = { post -> viewModel.deletePost(post) }
         )
     }
 
@@ -109,7 +114,12 @@ class MatchDetailsFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateMatchDetails(match: Match) {
         binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
-        binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+        if (match.homeTeamGoals != null && match.awayTeamGoals != null) {
+            binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+        } else {
+            binding.matchResultTextView.visibility = View.GONE
+        }
+
         binding.matchDetailsTextView.text = "Date: ${match.date}"
 
         if (match.matchImage.isNotEmpty()) {
@@ -133,6 +143,13 @@ class MatchDetailsFragment : Fragment() {
         }
     }
 
+    private fun observeLoadingState() {
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
     private fun getCurrentUser(): String {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -149,7 +166,11 @@ class MatchDetailsFragment : Fragment() {
                     createPost(content, args.matchId, location)
                 }
             } else {
-                Toast.makeText(requireContext(), "Please enable location permissions in settings", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Please enable location permissions in settings",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -157,15 +178,20 @@ class MatchDetailsFragment : Fragment() {
     private fun fetchUserLocation(onLocationRetrieved: (GeoPoint?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED) {
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
 
-            fusedLocationClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+            fusedLocationClient.getCurrentLocation(
+                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                null
+            )
                 .addOnSuccessListener { location: Location? ->
                     val geoPoint = location?.let { GeoPoint(it.latitude, it.longitude) }
                     onLocationRetrieved(geoPoint)
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                        .show()
                     onLocationRetrieved(null)
                 }
         } else {
@@ -175,7 +201,8 @@ class MatchDetailsFragment : Fragment() {
 
     private fun createPost(content: String, matchId: String, location: GeoPoint?) {
         if (content.isEmpty()) {
-            Toast.makeText(requireContext(), "Post content cannot be empty", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Post content cannot be empty", Toast.LENGTH_SHORT)
+                .show()
             return
         }
         val newPost = Post(
@@ -198,15 +225,23 @@ class MatchDetailsFragment : Fragment() {
             val content = binding.postEditText.text.toString().trim()
             val matchId = args.matchId
 
+            viewModel.setLoading(true)
             fetchUserLocation { location ->
                 createPost(content, matchId, location)
+                viewModel.setLoading(false)
             }
+
         }
+
     }
 
     private fun setupErrorMsgListener() {
         viewModel.errorMessage.observe(viewLifecycleOwner) {
-            Toast.makeText(requireContext(), "Failed to create post. Try again.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Failed to create post. Try again.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
