@@ -1,5 +1,6 @@
 package com.example.fan_zone.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,9 +43,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
+        googleMap.isMyLocationEnabled = true
         googleMap.uiSettings.isZoomControlsEnabled = true
+        googleMap.uiSettings.isMyLocationButtonEnabled = true
 
         loadPostsOnMap()
 
@@ -74,9 +78,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun showPostDetails(post: Post) {
-        val postDetailsFragment = PostDetailsBottomSheetFragment.newInstance(post)
-        postDetailsFragment.show(parentFragmentManager, "PostDetailsFragment")
+        val existingFragment = parentFragmentManager.findFragmentByTag("PostDetailsFragment")
+
+        // Only show the fragment if it's not already visible
+        if (existingFragment == null) {
+            val postDetailsFragment = PostDetailsBottomSheetFragment.newInstance(post)
+            postDetailsFragment.show(parentFragmentManager, "PostDetailsFragment")
+        }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
