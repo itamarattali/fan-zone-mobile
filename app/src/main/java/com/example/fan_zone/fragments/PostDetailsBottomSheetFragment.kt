@@ -2,6 +2,7 @@ package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,7 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPostDetailsBottomSheetBinding? = null
     private val binding get() = _binding!!
     private val userRepository = UserRepository()
-    private lateinit var post: Post;
+    private lateinit var post: Post
 
     companion object {
         fun newInstance(post: Post): PostDetailsBottomSheetFragment {
@@ -43,29 +44,31 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            val user = userRepository.getUserData(post.userId)
+        // Only access the binding if it's non-null
+        _binding?.let { binding ->
+            CoroutineScope(Dispatchers.Main).launch {
+                val user = userRepository.getUserData(post.userId)
 
-            if (user != null) {
-                binding.usernameTextView.text = user.fullName
+                if (user != null) {
+                    binding.usernameTextView.text = user.fullName
+                    Picasso.get().load(user.profilePicUrl)
+                        .placeholder(R.drawable.ic_matches)
+                        .error(R.drawable.ic_matches)
+                        .fit()
+                        .centerCrop().into(binding.profileImageView)
+                } else {
+                    binding.usernameTextView.text = "unknown user"
+                }
 
-                Picasso.get().load(user.profilePicUrl)
-                    .placeholder(R.drawable.ic_matches)
-                    .error(R.drawable.ic_matches)
-                    .fit()
-                    .centerCrop().into(binding.profileImageView)
-
-            } else {
-                binding.usernameTextView.text = "unknown user"
-
+                binding.contentTextView.text = post.content
+                binding.likeCountTextView.text = post.likedUserIds.size.toString()
+                val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(post.timePosted)
+                binding.dateTextView.text = formattedDate
             }
-
-            binding.contentTextView.text = post.content
-            binding.likeCountTextView.text = post.likedUserIds.size.toString()
-            val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(post.timePosted)
-            binding.dateTextView.text = formattedDate
+        } ?: run {
+            // You can log or handle this scenario if needed
+            Log.e("PostDetailsFragment", "Binding is null, skipping view setup.")
         }
-
     }
 
     override fun onDestroyView() {
