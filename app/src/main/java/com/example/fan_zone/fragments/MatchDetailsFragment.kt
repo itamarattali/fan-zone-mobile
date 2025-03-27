@@ -59,7 +59,8 @@ class MatchDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.returnToFeed.setOnClickListener {
-            val action = MatchDetailsFragmentDirections.actionMatchDetailsFragmentToMatchesFeedFragment()
+            val action =
+                MatchDetailsFragmentDirections.actionMatchDetailsFragmentToMatchesFeedFragment()
             findNavController().navigate(action)
         }
         setupMatchDetailsObserver()
@@ -113,9 +114,9 @@ class MatchDetailsFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun updateMatchDetails(match: Match) {
         binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
-        if (match.homeTeamGoals != null){
+        if (match.homeTeamGoals != null && match.awayTeamGoals != null) {
             binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
-        }else{
+        } else {
             binding.matchResultTextView.visibility = View.GONE
         }
 
@@ -165,7 +166,11 @@ class MatchDetailsFragment : Fragment() {
                     createPost(content, args.matchId, location)
                 }
             } else {
-                Toast.makeText(requireContext(), "Please enable location permissions in settings", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Please enable location permissions in settings",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -173,15 +178,20 @@ class MatchDetailsFragment : Fragment() {
     private fun fetchUserLocation(onLocationRetrieved: (GeoPoint?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED) {
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
 
-            fusedLocationClient.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+            fusedLocationClient.getCurrentLocation(
+                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                null
+            )
                 .addOnSuccessListener { location: Location? ->
                     val geoPoint = location?.let { GeoPoint(it.latitude, it.longitude) }
                     onLocationRetrieved(geoPoint)
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                        .show()
                     onLocationRetrieved(null)
                 }
         } else {
@@ -191,7 +201,8 @@ class MatchDetailsFragment : Fragment() {
 
     private fun createPost(content: String, matchId: String, location: GeoPoint?) {
         if (content.isEmpty()) {
-            Toast.makeText(requireContext(), "Post content cannot be empty", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Post content cannot be empty", Toast.LENGTH_SHORT)
+                .show()
             return
         }
         val newPost = Post(
@@ -226,7 +237,11 @@ class MatchDetailsFragment : Fragment() {
 
     private fun setupErrorMsgListener() {
         viewModel.errorMessage.observe(viewLifecycleOwner) {
-            Toast.makeText(requireContext(), "Failed to create post. Try again.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Failed to create post. Try again.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
