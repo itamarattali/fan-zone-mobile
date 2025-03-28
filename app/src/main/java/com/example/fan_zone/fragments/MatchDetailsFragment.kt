@@ -122,9 +122,9 @@ class MatchDetailsFragment : Fragment() {
 
         binding.matchDetailsTextView.text = "Date: ${match.date}"
 
-        if (match.matchImage.isNotEmpty()) {
+        if (match.homeTeamImage.isNotEmpty()) {
             Picasso.get()
-                .load(match.matchImage)
+                .load(match.homeTeamImage)
                 .placeholder(R.drawable.ic_matches)
                 .error(R.drawable.ic_matches)
                 .fit()

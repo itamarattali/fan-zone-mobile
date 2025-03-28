@@ -11,7 +11,8 @@ data class Match(
     val date: Date,
     val homeTeam: String,
     val awayTeam: String,
-    val matchImage: String,
+    val homeTeamImage: String,
+    val awayTeamImage: String,
     val homeTeamGoals: Int?,
     val awayTeamGoals: Int?
 )
