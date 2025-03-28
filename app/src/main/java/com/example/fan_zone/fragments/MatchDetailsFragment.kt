@@ -39,7 +39,7 @@ class MatchDetailsFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var popularPostsAdapter: PostAdapter
     private lateinit var userPostsAdapter: PostAdapter
-
+    private var userLocation: GeoPoint? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,6 +57,10 @@ class MatchDetailsFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        fetchUserLocation { location ->
+            userLocation = location
+        }
 
         binding.returnToFeed.setOnClickListener {
             val action =
@@ -174,7 +178,6 @@ class MatchDetailsFragment : Fragment() {
             }
         }
 
-    @SuppressLint("MissingPermission")
     private fun fetchUserLocation(onLocationRetrieved: (GeoPoint?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -182,7 +185,7 @@ class MatchDetailsFragment : Fragment() {
         ) {
 
             fusedLocationClient.getCurrentLocation(
-                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
                 null
             )
                 .addOnSuccessListener { location: Location? ->
@@ -192,7 +195,6 @@ class MatchDetailsFragment : Fragment() {
                 .addOnFailureListener {
                     Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
                         .show()
-                    onLocationRetrieved(null)
                 }
         } else {
             requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -225,14 +227,9 @@ class MatchDetailsFragment : Fragment() {
             val content = binding.postEditText.text.toString().trim()
             val matchId = args.matchId
 
-            viewModel.setLoading(true)
-            fetchUserLocation { location ->
-                createPost(content, matchId, location)
-                viewModel.setLoading(false)
-            }
-
+            val location = userLocation
+            createPost(content, matchId, location)
         }
-
     }
 
     private fun setupErrorMsgListener() {
