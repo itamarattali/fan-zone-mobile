@@ -16,7 +16,6 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-        <!-- User Info Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,7 +41,6 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <!-- Post Content (Hidden when editing) -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contentTextView"
             android:layout_width="wrap_content"
@@ -51,7 +49,6 @@
             android:layout_marginBottom="5dp"
             android:visibility="visible"/>
 
-        <!-- Edit Post Input (Replaces old content while editing) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editPostContainer"
             android:layout_width="match_parent"
@@ -70,7 +67,6 @@
                 android:textSize="14sp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Edit Action Buttons (Visible only in edit mode) -->
         <LinearLayout
             android:id="@+id/editActionsContainer"
             android:layout_width="match_parent"
@@ -80,7 +76,6 @@
             android:gravity="end"
             android:layout_marginTop="5dp"
             android:paddingTop="4dp">
-            <!-- Submit Edit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitEditButton"
                 android:layout_width="wrap_content"
@@ -92,7 +87,6 @@
                 android:layout_marginStart="8dp"/>
         </LinearLayout>
 
-        <!-- Like Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -100,7 +94,6 @@
             android:gravity="center_vertical"
             android:paddingTop="8dp">
 
-            <!-- Like Icon -->
             <ImageView
                 android:id="@+id/likeIcon"
                 android:layout_width="24dp"
@@ -119,7 +112,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- "Edit Post" Option (Only Shown for Post Owner) -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/editPostText"
             android:layout_width="wrap_content"
