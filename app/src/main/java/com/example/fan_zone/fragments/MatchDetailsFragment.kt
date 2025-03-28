@@ -2,6 +2,7 @@ package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.net.Uri
@@ -47,22 +48,30 @@ class MatchDetailsFragment : Fragment() {
     private var currentEditingPost: Post? = null
     private var editImageUri: Uri? = null
 
-    private val getContent =
+    private val getContentForNewPost =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                selectedImageUri = it
+                binding.postImagePreview.apply {
+                    visibility = View.VISIBLE
+                    val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
+                    val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                        decoder.isMutableRequired = true
+                    }
+                    setImageBitmap(bitmap)
+                }
+            }
+        }
+
+    private val getContentForEdit =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 currentEditingPost?.let { post ->
-                    // Just show preview for editing
-                    editImageUri = uri
+                    editImageUri = it
                     val postAdapter =
                         if (post.userId == getCurrentUser()) userPostsAdapter else popularPostsAdapter
                     postAdapter.showImagePreview(post.id, uri)
-                } ?: run {
-                    // Handle image selection for new post
-                    selectedImageUri = it
-                    binding.postImagePreview.apply {
-                        visibility = View.VISIBLE
-                        Picasso.get().load(uri).into(this)
-                    }
                 }
             }
         }
@@ -121,9 +130,9 @@ class MatchDetailsFragment : Fragment() {
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
                 currentEditingPost = post
-                getContent.launch("image/*")
+                getContentForEdit.launch("image/*")  // Use edit-specific picker
             },
-            onLoadingStateChanged = { isLoading ->  // Add this
+            onLoadingStateChanged = { isLoading ->
                 viewModel.setLoading(isLoading)
             }
         )
@@ -137,9 +146,9 @@ class MatchDetailsFragment : Fragment() {
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
                 currentEditingPost = post
-                getContent.launch("image/*")
+                getContentForEdit.launch("image/*")  // Use edit-specific picker
             },
-            onLoadingStateChanged = { isLoading ->  // Add this
+            onLoadingStateChanged = { isLoading ->
                 viewModel.setLoading(isLoading)
             }
         )
@@ -309,8 +318,13 @@ class MatchDetailsFragment : Fragment() {
 
     private fun clearPostForm() {
         binding.postEditText.text?.clear()
-        binding.postImagePreview.visibility = View.GONE
+        binding.postImagePreview.apply {
+            setImageBitmap(null)  // Clear the image
+            visibility = View.GONE
+        }
         selectedImageUri = null
+        currentEditingPost = null  // Reset editing state
+        editImageUri = null       // Reset edit image
     }
 
     private fun setupClickListeners() {
@@ -330,7 +344,7 @@ class MatchDetailsFragment : Fragment() {
         }
 
         binding.selectImageButton.setOnClickListener {
-            getContent.launch("image/*")
+            getContentForNewPost.launch("image/*")  // Use new post picker
         }
     }
 

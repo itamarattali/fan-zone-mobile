@@ -241,7 +241,14 @@ class PostAdapter(
             pendingImageUri = uri
             isImageRemoved = false
             binding.postImageView.visibility = View.VISIBLE
-            Picasso.get().load(uri).into(binding.postImageView)
+
+            val source = ImageDecoder.createSource(binding.root.context.contentResolver, uri)
+            val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                decoder.isMutableRequired = true
+            }
+            binding.postImageView.setImageBitmap(bitmap)
+
             binding.removeImageButton.visibility = View.VISIBLE
             binding.changeImageButton.text = "Change Image"
         }
