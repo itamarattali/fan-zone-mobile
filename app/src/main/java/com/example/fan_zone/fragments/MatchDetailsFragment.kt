@@ -2,7 +2,6 @@ package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.net.Uri
@@ -46,39 +45,17 @@ class MatchDetailsFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
     private var currentEditingPost: Post? = null
+    private var editImageUri: Uri? = null
 
     private val getContent =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 currentEditingPost?.let { post ->
-                    // Handle image selection for post editing
-                    val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
-                    val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
-                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                        decoder.isMutableRequired = true
-                    }
-
-                    viewModel.setLoading(true)
-                    Model.shared.uploadImageToCloudinary(
-                        bitmap = bitmap,
-                        name = "post_${System.currentTimeMillis()}",
-                        onSuccess = { imageUrl ->
-                            viewModel.updatePost(post.id, post.content, imageUrl)
-                            viewModel.setLoading(false)
-                            currentEditingPost = null
-                        },
-                        onError = { error ->
-                            activity?.runOnUiThread {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Failed to upload image: $error",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                viewModel.setLoading(false)
-                                currentEditingPost = null
-                            }
-                        }
-                    )
+                    // Just show preview for editing
+                    editImageUri = uri
+                    val postAdapter =
+                        if (post.userId == getCurrentUser()) userPostsAdapter else popularPostsAdapter
+                    postAdapter.showImagePreview(post.id, uri)
                 } ?: run {
                     // Handle image selection for new post
                     selectedImageUri = it
