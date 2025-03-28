@@ -24,7 +24,8 @@ class PostAdapter(
     private val onUnlikeClicked: (Post) -> Unit,
     private val onEditPost: (String, String, String?) -> Unit,
     private val onDeletePost: (Post) -> Unit,
-    private val onImageEditRequest: (Post) -> Unit
+    private val onImageEditRequest: (Post) -> Unit,
+    private val onLoadingStateChanged: (Boolean) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private val posts = mutableListOf<Post>()
@@ -51,6 +52,7 @@ class PostAdapter(
             onEditPost,
             onDeletePost,
             onImageEditRequest,
+            onLoadingStateChanged,  // Add this parameter
             userRepository
         )
     }
@@ -86,6 +88,7 @@ class PostAdapter(
             onEditPost: (String, String, String?) -> Unit,
             onDeletePost: (Post) -> Unit,
             onImageEditRequest: (Post) -> Unit,
+            onLoadingStateChanged: (Boolean) -> Unit,  // Add this parameter
             userRepository: UserRepository
         ) {
             binding.contentTextView.text = post.content
@@ -177,6 +180,7 @@ class PostAdapter(
                 if (updatedContent.isNotEmpty()) {
                     if (pendingImageUri != null && !isImageRemoved) {
                         // Upload new image
+                        onLoadingStateChanged(true)  // Show loading
                         val source = ImageDecoder.createSource(
                             binding.root.context.contentResolver,
                             pendingImageUri!!
@@ -195,8 +199,10 @@ class PostAdapter(
                                 toggleEditMode(false)
                                 isImageRemoved = false
                                 pendingImageUri = null
+                                onLoadingStateChanged(false)  // Hide loading
                             },
                             onError = { error ->
+                                onLoadingStateChanged(false)  // Hide loading on error
                                 Toast.makeText(
                                     binding.root.context,
                                     "Failed to upload image: $error",

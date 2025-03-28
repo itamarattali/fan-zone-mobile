@@ -122,6 +122,9 @@ class MatchDetailsFragment : Fragment() {
             onImageEditRequest = { post ->
                 currentEditingPost = post
                 getContent.launch("image/*")
+            },
+            onLoadingStateChanged = { isLoading ->  // Add this
+                viewModel.setLoading(isLoading)
             }
         )
 
@@ -135,6 +138,9 @@ class MatchDetailsFragment : Fragment() {
             onImageEditRequest = { post ->
                 currentEditingPost = post
                 getContent.launch("image/*")
+            },
+            onLoadingStateChanged = { isLoading ->  // Add this
+                viewModel.setLoading(isLoading)
             }
         )
     }
