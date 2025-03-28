@@ -10,12 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fan_zone.R
 import com.example.fan_zone.adapters.MatchListAdapter
 import com.example.fan_zone.databinding.FragmentMatchesFeedBinding
 import com.example.fan_zone.viewModels.MatchListViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class MatchesFeedFragment : Fragment() {
     private lateinit var binding: FragmentMatchesFeedBinding
@@ -65,7 +65,7 @@ class MatchesFeedFragment : Fragment() {
         var isTodayCentered = false
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-        for (i in -3..3) {
+        for (i in -10..10) {
             val button = Button(requireContext()).apply {
                 val date = calendar.time
                 val dayOfWeek = android.text.format.DateFormat.format("EEE", date).toString()

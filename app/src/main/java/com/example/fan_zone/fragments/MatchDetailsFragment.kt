@@ -2,7 +2,9 @@ package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.drawable.BitmapDrawable
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +23,7 @@ import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
 import com.example.fan_zone.models.GeoPoint
 import com.example.fan_zone.models.Match
+import com.example.fan_zone.models.Model
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -40,6 +43,17 @@ class MatchDetailsFragment : Fragment() {
     private lateinit var popularPostsAdapter: PostAdapter
     private lateinit var userPostsAdapter: PostAdapter
 
+    private var selectedImageUri: Uri? = null
+    private val getContent =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                selectedImageUri = it
+                binding.postImagePreview.apply {
+                    visibility = View.VISIBLE
+                    Picasso.get().load(uri).into(this)
+                }
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -205,6 +219,53 @@ class MatchDetailsFragment : Fragment() {
                 .show()
             return
         }
+
+        viewModel.setLoading(true)
+
+        // If there's a selected image, upload it first
+        if (binding.postImagePreview.visibility == View.VISIBLE) {
+            uploadPostImage(content, matchId, location)
+        } else {
+            createPostWithoutImage(content, matchId, location)
+        }
+    }
+
+    private fun uploadPostImage(content: String, matchId: String, location: GeoPoint?) {
+        val bitmap = (binding.postImagePreview.drawable as? BitmapDrawable)?.bitmap ?: run {
+            createPostWithoutImage(content, matchId, location)
+            return
+        }
+
+        Model.shared.uploadImageToCloudinary(
+            bitmap = bitmap,
+            name = "post_${System.currentTimeMillis()}",
+            onSuccess = { imageUrl ->
+                val newPost = Post(
+                    userId = getCurrentUser(),
+                    content = content,
+                    timePosted = Date(),
+                    matchId = matchId,
+                    location = location,
+                    imageUrl = imageUrl
+                )
+                viewModel.createPost(newPost)
+                clearPostForm()
+                viewModel.setLoading(false)
+            },
+            onError = { error ->
+                activity?.runOnUiThread {
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to upload image: $error",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    viewModel.setLoading(false)
+                }
+            }
+        )
+    }
+
+    private fun createPostWithoutImage(content: String, matchId: String, location: GeoPoint?) {
         val newPost = Post(
             userId = getCurrentUser(),
             content = content,
@@ -212,8 +273,15 @@ class MatchDetailsFragment : Fragment() {
             matchId = matchId,
             location = location
         )
-
         viewModel.createPost(newPost)
+        clearPostForm()
+        viewModel.setLoading(false)
+    }
+
+    private fun clearPostForm() {
+        binding.postEditText.text?.clear()
+        binding.postImagePreview.visibility = View.GONE
+        selectedImageUri = null
     }
 
     private fun setupClickListeners() {
@@ -231,6 +299,10 @@ class MatchDetailsFragment : Fragment() {
                 viewModel.setLoading(false)
             }
 
+        }
+
+        binding.selectImageButton.setOnClickListener {
+            getContent.launch("image/*")
         }
 
     }

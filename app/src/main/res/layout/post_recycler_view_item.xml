@@ -51,6 +51,14 @@
             android:layout_marginBottom="5dp"
             android:visibility="visible"/>
 
+        <ImageView
+            android:id="@+id/postImageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
         <!-- Edit Post Input (Replaces old content while editing) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editPostContainer"

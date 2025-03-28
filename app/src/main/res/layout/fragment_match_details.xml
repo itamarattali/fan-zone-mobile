@@ -74,6 +74,22 @@
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <ImageView
+                android:id="@+id/postImagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/selectImageButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Add Image" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/postButton"
                 android:layout_width="match_parent"

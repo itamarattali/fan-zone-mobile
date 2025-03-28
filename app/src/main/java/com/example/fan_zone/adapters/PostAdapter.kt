@@ -56,6 +56,14 @@ class PostAdapter(
         ) {
             binding.contentTextView.text = post.content
             binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
+            post.imageUrl?.let { imageUrl ->
+                binding.postImageView.visibility = View.VISIBLE
+                Picasso.get()
+                    .load(imageUrl)
+                    .into(binding.postImageView)
+            } ?: run {
+                binding.postImageView.visibility = View.GONE
+            }
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
