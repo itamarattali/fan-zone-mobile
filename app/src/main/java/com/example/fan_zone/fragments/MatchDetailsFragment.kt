@@ -230,7 +230,7 @@ class MatchDetailsFragment : Fragment() {
             if (userLocation != null) {
                 createPost(content, matchId, userLocation)
             }else{
-                Toast.makeText(context, "could not retrieve location", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "could not retrieve location", Toast.LENGTH_SHORT).show()
             }
         }
     }
