@@ -2,6 +2,7 @@ package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.net.Uri
@@ -44,13 +45,47 @@ class MatchDetailsFragment : Fragment() {
     private lateinit var userPostsAdapter: PostAdapter
 
     private var selectedImageUri: Uri? = null
+    private var currentEditingPost: Post? = null
+
     private val getContent =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
-                selectedImageUri = it
-                binding.postImagePreview.apply {
-                    visibility = View.VISIBLE
-                    Picasso.get().load(uri).into(this)
+                currentEditingPost?.let { post ->
+                    // Handle image selection for post editing
+                    val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
+                    val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                        decoder.isMutableRequired = true
+                    }
+
+                    viewModel.setLoading(true)
+                    Model.shared.uploadImageToCloudinary(
+                        bitmap = bitmap,
+                        name = "post_${System.currentTimeMillis()}",
+                        onSuccess = { imageUrl ->
+                            viewModel.updatePost(post.id, post.content, imageUrl)
+                            viewModel.setLoading(false)
+                            currentEditingPost = null
+                        },
+                        onError = { error ->
+                            activity?.runOnUiThread {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to upload image: $error",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                viewModel.setLoading(false)
+                                currentEditingPost = null
+                            }
+                        }
+                    )
+                } ?: run {
+                    // Handle image selection for new post
+                    selectedImageUri = it
+                    binding.postImagePreview.apply {
+                        visibility = View.VISIBLE
+                        Picasso.get().load(uri).into(this)
+                    }
                 }
             }
         }
@@ -103,15 +138,27 @@ class MatchDetailsFragment : Fragment() {
         popularPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) },
-            onDeletePost = { post -> viewModel.deletePost(post) }
+            onEditPost = { postId, content, imageUrl ->
+                viewModel.updatePost(postId, content, imageUrl)
+            },
+            onDeletePost = { post -> viewModel.deletePost(post) },
+            onImageEditRequest = { post ->
+                currentEditingPost = post
+                getContent.launch("image/*")
+            }
         )
 
         userPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) },
-            onDeletePost = { post -> viewModel.deletePost(post) }
+            onEditPost = { postId, content, imageUrl ->
+                viewModel.updatePost(postId, content, imageUrl)
+            },
+            onDeletePost = { post -> viewModel.deletePost(post) },
+            onImageEditRequest = { post ->
+                currentEditingPost = post
+                getContent.launch("image/*")
+            }
         )
     }
 
@@ -194,7 +241,6 @@ class MatchDetailsFragment : Fragment() {
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-
             fusedLocationClient.getCurrentLocation(
                 com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
                 null
@@ -298,13 +344,11 @@ class MatchDetailsFragment : Fragment() {
                 createPost(content, matchId, location)
                 viewModel.setLoading(false)
             }
-
         }
 
         binding.selectImageButton.setOnClickListener {
             getContent.launch("image/*")
         }
-
     }
 
     private fun setupErrorMsgListener() {

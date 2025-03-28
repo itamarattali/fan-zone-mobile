@@ -88,6 +88,33 @@
             android:gravity="end"
             android:layout_marginTop="5dp"
             android:paddingTop="4dp">
+
+            <LinearLayout
+                android:id="@+id/imageEditControls"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/changeImageButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Change Image"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/removeImageButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remove Image"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
             <!-- Submit Edit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitEditButton"

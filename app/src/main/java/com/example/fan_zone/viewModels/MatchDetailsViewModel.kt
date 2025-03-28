@@ -51,13 +51,13 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun updatePost(post: Post) {
+    fun updatePost(postId: String, content: String, imageUrl: String? = null) {
         viewModelScope.launch {
             _isLoading.postValue(true)
             try {
-                postRepository.updatePost(post.id, post.content)
-                val updatedUserPosts = _userPosts.value?.map { if (it.id == post.id) post.copy() else it } ?: emptyList()
-                _userPosts.postValue(updatedUserPosts)
+                postRepository.updatePost(postId, content, imageUrl)
+                // Refresh posts to show updated content
+                fetchPosts(_matchId.value ?: return@launch)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to edit post")
             } finally {
