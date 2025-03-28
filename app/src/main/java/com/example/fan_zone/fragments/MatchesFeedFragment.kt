@@ -22,7 +22,11 @@ class MatchesFeedFragment : Fragment() {
     private val matchListViewModel: MatchListViewModel by viewModels()
     private lateinit var matchAdapter: MatchListAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = FragmentMatchesFeedBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -31,7 +35,10 @@ class MatchesFeedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         matchAdapter = MatchListAdapter(mutableListOf()) { match ->
-            val action = MatchesFeedFragmentDirections.actionMatchesFeedFragmentToMatchDetailsFragment(matchId = match.id.toString())
+            val action =
+                MatchesFeedFragmentDirections.actionMatchesFeedFragmentToMatchDetailsFragment(
+                    matchId = match.id.toString()
+                )
             findNavController().navigate(action)
         }
 
@@ -65,7 +72,7 @@ class MatchesFeedFragment : Fragment() {
         var isTodayCentered = false
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-        for (i in -10..10) {
+        for (i in -7..7) {
             val button = Button(requireContext()).apply {
                 val date = calendar.time
                 val dayOfWeek = android.text.format.DateFormat.format("EEE", date).toString()
@@ -81,8 +88,10 @@ class MatchesFeedFragment : Fragment() {
 
             dateContainer.addView(button)
 
-            if (calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR) &&
-                calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)) {
+            if (calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance()
+                    .get(Calendar.DAY_OF_YEAR) &&
+                calendar.get(Calendar.YEAR) == Calendar.getInstance().get(Calendar.YEAR)
+            ) {
                 todayButton = button
                 selectedDateText.text = dateFormat.format(calendar.time)
             }

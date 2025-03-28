@@ -47,6 +47,7 @@ class MatchDetailsFragment : Fragment() {
     private var selectedImageUri: Uri? = null
     private var currentEditingPost: Post? = null
     private var editImageUri: Uri? = null
+    private var userLocation: GeoPoint? = null
 
     private val getContentForNewPost =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -92,6 +93,10 @@ class MatchDetailsFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        fetchUserLocation { location ->
+            userLocation = location
+        }
 
         binding.returnToFeed.setOnClickListener {
             val action =
@@ -175,9 +180,9 @@ class MatchDetailsFragment : Fragment() {
 
         binding.matchDetailsTextView.text = "Date: ${match.date}"
 
-        if (match.matchImage.isNotEmpty()) {
+        if (match.homeTeamImage.isNotEmpty()) {
             Picasso.get()
-                .load(match.matchImage)
+                .load(match.homeTeamImage)
                 .placeholder(R.drawable.ic_matches)
                 .error(R.drawable.ic_matches)
                 .fit()
@@ -227,14 +232,13 @@ class MatchDetailsFragment : Fragment() {
             }
         }
 
-    @SuppressLint("MissingPermission")
     private fun fetchUserLocation(onLocationRetrieved: (GeoPoint?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             fusedLocationClient.getCurrentLocation(
-                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
                 null
             )
                 .addOnSuccessListener { location: Location? ->
@@ -244,7 +248,6 @@ class MatchDetailsFragment : Fragment() {
                 .addOnFailureListener {
                     Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
                         .show()
-                    onLocationRetrieved(null)
                 }
         } else {
             requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -336,11 +339,8 @@ class MatchDetailsFragment : Fragment() {
             val content = binding.postEditText.text.toString().trim()
             val matchId = args.matchId
 
-            viewModel.setLoading(true)
-            fetchUserLocation { location ->
-                createPost(content, matchId, location)
-                viewModel.setLoading(false)
-            }
+            val location = userLocation
+            createPost(content, matchId, location)
         }
 
         binding.selectImageButton.setOnClickListener {
