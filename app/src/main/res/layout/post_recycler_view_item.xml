@@ -83,18 +83,18 @@
             android:id="@+id/editActionsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:visibility="gone"
-            android:gravity="end"
             android:layout_marginTop="5dp"
             android:paddingTop="4dp">
 
+            <!-- Image Edit Controls Row -->
             <LinearLayout
                 android:id="@+id/imageEditControls"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="horizontal"
+                android:gravity="center"
                 android:visibility="gone">
 
                 <com.google.android.material.button.MaterialButton
@@ -103,7 +103,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Change Image"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/removeImageButton"
@@ -112,10 +113,11 @@
                     android:layout_height="wrap_content"
                     android:text="Remove Image"
                     android:textColor="@android:color/holo_red_dark"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:layout_marginStart="8dp" />
             </LinearLayout>
 
-            <!-- Submit Edit Button -->
+            <!-- Submit Button Row -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitEditButton"
                 android:layout_width="wrap_content"
@@ -123,8 +125,8 @@
                 android:text="Post"
                 android:textColor="@android:color/white"
                 android:backgroundTint="@color/primary"
-                android:visibility="gone"
-                android:layout_marginStart="8dp"/>
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
 
         <!-- Like Section -->
