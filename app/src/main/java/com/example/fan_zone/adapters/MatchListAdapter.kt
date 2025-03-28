@@ -21,7 +21,8 @@ class MatchListAdapter(private val matches: MutableList<Match>, private val onIt
 
             binding.title.text = "${match.homeTeam} vs ${match.awayTeam}"
             binding.kickOffTime.text = dateFormatter.format(match.date)
-            Picasso.get().load(match.matchImage ?: "").into(binding.imageViewTeamLogo)
+            Picasso.get().load(match.homeTeamImage ?: "").into(binding.homeTeamLogo)
+            Picasso.get().load(match.awayTeamImage ?: "").into(binding.awayTeamLogo)
             binding.root.setOnClickListener {
                 onItemClick(match)
             }
