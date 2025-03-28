@@ -94,12 +94,14 @@ class PostAdapter(
             binding.contentTextView.text = post.content
             binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
 
-            // Handle post image
             post.imageUrl?.let { imageUrl ->
                 currentImageUrl = imageUrl
                 binding.postImageView.visibility = View.VISIBLE
                 Picasso.get()
                     .load(imageUrl)
+                    .rotate(0f)  // Add rotation handling
+                    .fit()
+                    .centerInside()
                     .into(binding.postImageView)
             } ?: run {
                 binding.postImageView.visibility = View.GONE
@@ -179,8 +181,7 @@ class PostAdapter(
                 val updatedContent = binding.editPostEditText.text.toString().trim()
                 if (updatedContent.isNotEmpty()) {
                     if (pendingImageUri != null && !isImageRemoved) {
-                        // Upload new image
-                        onLoadingStateChanged(true)  // Show loading
+                        onLoadingStateChanged(true)
                         val source = ImageDecoder.createSource(
                             binding.root.context.contentResolver,
                             pendingImageUri!!
@@ -194,15 +195,39 @@ class PostAdapter(
                             bitmap = bitmap,
                             name = "post_${System.currentTimeMillis()}",
                             onSuccess = { imageUrl ->
+                                // Update the post first
                                 onEditPost(post.id, updatedContent, imageUrl)
                                 binding.contentTextView.text = updatedContent
-                                toggleEditMode(false)
-                                isImageRemoved = false
-                                pendingImageUri = null
-                                onLoadingStateChanged(false)  // Hide loading
+
+                                // Then load the image with a callback
+                                binding.postImageView.visibility = View.VISIBLE
+                                Picasso.get()
+                                    .load(imageUrl)
+                                    .rotate(0f)
+                                    .fit()
+                                    .centerInside()
+                                    .into(
+                                        binding.postImageView,
+                                        object : com.squareup.picasso.Callback {
+                                            override fun onSuccess() {
+                                                toggleEditMode(false)
+                                                isImageRemoved = false
+                                                pendingImageUri = null
+                                                onLoadingStateChanged(false)
+                                            }
+
+                                            override fun onError(e: Exception?) {
+                                                onLoadingStateChanged(false)
+                                                Toast.makeText(
+                                                    binding.root.context,
+                                                    "Failed to load image: ${e?.message}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        })
                             },
                             onError = { error ->
-                                onLoadingStateChanged(false)  // Hide loading on error
+                                onLoadingStateChanged(false)
                                 Toast.makeText(
                                     binding.root.context,
                                     "Failed to upload image: $error",
