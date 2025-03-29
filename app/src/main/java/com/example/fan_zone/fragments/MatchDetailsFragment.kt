@@ -137,11 +137,21 @@ class MatchDetailsFragment : Fragment() {
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { postId, content, imageUrl ->
                 viewModel.updatePost(postId, content, imageUrl)
+                currentEditingPost = null  // Reset editing state after successful edit
+                editImageUri = null
             },
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
+                // If there's already a post being edited, cancel its edit mode first
+                currentEditingPost?.let { currentPost ->
+                    if (currentPost.id != post.id) {
+                        // Cancel edit in both adapters to ensure no other post is in edit mode
+                        popularPostsAdapter.cancelEdit(currentPost.id)
+                        userPostsAdapter.cancelEdit(currentPost.id)
+                    }
+                }
                 currentEditingPost = post
-                getContentForEdit.launch("image/*")  // Use edit-specific picker
+                getContentForEdit.launch("image/*")
             },
             onLoadingStateChanged = { isLoading ->
                 viewModel.setLoading(isLoading)
@@ -153,11 +163,21 @@ class MatchDetailsFragment : Fragment() {
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { postId, content, imageUrl ->
                 viewModel.updatePost(postId, content, imageUrl)
+                currentEditingPost = null  // Reset editing state after successful edit
+                editImageUri = null
             },
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
+                // If there's already a post being edited, cancel its edit mode first
+                currentEditingPost?.let { currentPost ->
+                    if (currentPost.id != post.id) {
+                        // Cancel edit in both adapters to ensure no other post is in edit mode
+                        popularPostsAdapter.cancelEdit(currentPost.id)
+                        userPostsAdapter.cancelEdit(currentPost.id)
+                    }
+                }
                 currentEditingPost = post
-                getContentForEdit.launch("image/*")  // Use edit-specific picker
+                getContentForEdit.launch("image/*")
             },
             onLoadingStateChanged = { isLoading ->
                 viewModel.setLoading(isLoading)

@@ -2,6 +2,7 @@ package com.example.fan_zone.fragments
 
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,14 +11,19 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.AuthActivity
 import com.example.fan_zone.R
+import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
+import com.example.fan_zone.models.Post
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
+import com.example.fan_zone.viewModels.ProfileViewModel
 
 class ProfileFragment : Fragment() {
 
@@ -27,11 +33,24 @@ class ProfileFragment : Fragment() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var model: Model
+    private val viewModel: ProfileViewModel by viewModels()
+    private lateinit var postsAdapter: PostAdapter
+    private var currentEditingPost: Post? = null
+    private var editImageUri: Uri? = null
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         bitmap?.let {
             binding.ivProfilePicture.setImageBitmap(it)
             shouldUpdateProfilePicture = true
+        }
+    }
+
+    private val getContentForEdit = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            currentEditingPost?.let { post ->
+                editImageUri = it
+                postsAdapter.showImagePreview(post.id, uri)
+            }
         }
     }
 
@@ -48,6 +67,8 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initialize()
         setupUI()
+        setupRecyclerView()
+        setupObservers()
         loadUserProfile()
     }
 
@@ -70,13 +91,59 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun setupRecyclerView() {
+        postsAdapter = PostAdapter(
+            onLikeClicked = { post -> viewModel.likePost(post) },
+            onUnlikeClicked = { post -> viewModel.unlikePost(post) },
+            onEditPost = { postId, content, imageUrl ->
+                viewModel.updatePost(postId, content, imageUrl)
+                currentEditingPost = null  // Reset editing state after successful edit
+                editImageUri = null
+            },
+            onDeletePost = { post -> viewModel.deletePost(post) },
+            onImageEditRequest = { post -> 
+                // If there's already a post being edited, cancel its edit mode first
+                currentEditingPost?.let { currentPost ->
+                    if (currentPost.id != post.id) {
+                        postsAdapter.cancelEdit(currentPost.id)
+                    }
+                }
+                currentEditingPost = post
+                getContentForEdit.launch("image/*")
+            },
+            onLoadingStateChanged = { isLoading ->
+                viewModel.setLoading(isLoading)
+            }
+        )
+
+        binding.recyclerViewPosts.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = postsAdapter
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.userPosts.observe(viewLifecycleOwner) { posts ->
+            postsAdapter.submitList(posts)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            showLoading(isLoading)
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMsg ->
+            errorMsg?.let { showToast(it) }
+        }
+    }
+
     private fun loadUserProfile() {
         val userId = firebaseAuth.currentUser?.uid ?: run {
             navigateToAuth()
             return
         }
-
+        
         showLoading(true)
+        viewModel.fetchUserPosts(userId)
 
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
@@ -124,9 +191,9 @@ class ProfileFragment : Fragment() {
         binding.apply {
             tvFullName.visibility = View.GONE
             btnEdit.visibility = View.GONE
+            btnSignOut.visibility = View.GONE
             tilFullName.visibility = View.VISIBLE
-            btnSave.visibility = View.VISIBLE
-            btnChangePicture.visibility = View.VISIBLE
+            editModeButtons.visibility = View.VISIBLE
         }
     }
 
@@ -146,9 +213,9 @@ class ProfileFragment : Fragment() {
         binding.apply {
             tvFullName.visibility = View.VISIBLE
             btnEdit.visibility = View.VISIBLE
+            btnSignOut.visibility = View.VISIBLE
             tilFullName.visibility = View.GONE
-            btnSave.visibility = View.GONE
-            btnChangePicture.visibility = View.GONE
+            editModeButtons.visibility = View.GONE
         }
     }
 

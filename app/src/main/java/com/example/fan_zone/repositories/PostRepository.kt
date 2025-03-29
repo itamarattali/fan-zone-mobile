@@ -4,6 +4,7 @@ import com.example.fan_zone.models.Post
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
+import android.util.Log
 
 class PostRepository {
     private val db = FirebaseFirestore.getInstance()
@@ -28,12 +29,16 @@ class PostRepository {
         }
     }
 
-    suspend fun updatePost(postId: String, content: String, imageUrl: String? = null) {
+    suspend fun updatePost(postId: String, content: String, imageUrl: String?, likedUserIds: List<String>? = null) {
         try {
             val updates = mutableMapOf<String, Any?>(
                 "content" to content,
                 "imageUrl" to imageUrl
             )
+            
+            if (likedUserIds != null) {
+                updates["likedUserIds"] = likedUserIds
+            }
 
             postCollection.document(postId).update(updates).await()
         } catch (e: Exception) {
@@ -51,6 +56,25 @@ class PostRepository {
 
             snapshot.toObjects(Post::class.java)
         } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun getPostsByUserId(userId: String): List<Post> {
+        return try {
+            Log.d("PostRepository", "Fetching posts for user: $userId")
+            val snapshot = postCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("timePosted", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            Log.d("PostRepository", "Fetched ${snapshot.documents.size} documents")
+            val posts = snapshot.toObjects(Post::class.java)
+            Log.d("PostRepository", "Converted to ${posts.size} posts")
+            posts
+        } catch (e: Exception) {
+            Log.e("PostRepository", "Error fetching posts: ${e.message}")
             emptyList()
         }
     }
