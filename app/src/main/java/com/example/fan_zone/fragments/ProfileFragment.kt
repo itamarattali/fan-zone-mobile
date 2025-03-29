@@ -34,10 +34,10 @@ class ProfileFragment : Fragment() {
     private var editImageUri: Uri? = null
     private val userRepository = UserRepository()
 
-    private val cameraLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            bitmap?.let {
-                binding.ivProfilePicture.setImageBitmap(it)
+    private val pickImageForProfile =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                binding.ivProfilePicture.setImageURI(it) // Display the selected image
                 shouldUpdateProfilePicture = true
             }
         }
@@ -243,7 +243,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun pickImageFromGallery() {
-        cameraLauncher.launch(null)
+        pickImageForProfile.launch("image/*")
     }
 
     private fun signOut() {
