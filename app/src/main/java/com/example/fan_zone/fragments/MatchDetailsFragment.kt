@@ -22,9 +22,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.R
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
+import com.example.fan_zone.models.CloudinaryModel
 import com.example.fan_zone.models.GeoPoint
 import com.example.fan_zone.models.Match
-import com.example.fan_zone.models.Model
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.UserRepository
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
@@ -312,7 +312,7 @@ class MatchDetailsFragment : Fragment() {
             return
         }
 
-        Model.shared.uploadImageToCloudinary(
+        CloudinaryModel.shared.uploadImage(
             bitmap = bitmap,
             name = "post_${System.currentTimeMillis()}",
             onSuccess = { imageUrl ->

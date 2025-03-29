@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.PostRecyclerViewItemBinding
-import com.example.fan_zone.models.Model
+import com.example.fan_zone.models.CloudinaryModel
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.UserRepository
 import com.squareup.picasso.Picasso
@@ -227,7 +227,7 @@ class PostAdapter(
                             decoder.isMutableRequired = true
                         }
 
-                        Model.shared.uploadImageToCloudinary(
+                        CloudinaryModel.shared.uploadImage(
                             bitmap = bitmap,
                             name = "post_${System.currentTimeMillis()}",
                             onSuccess = { imageUrl ->

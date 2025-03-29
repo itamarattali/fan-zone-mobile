@@ -11,7 +11,7 @@ import com.example.fan_zone.utils.extensions.toFile
 import com.example.fan_zone.BuildConfig
 import java.io.File
 
-class CloudinaryModel {
+class CloudinaryModel private constructor() {
     init {
         val config = mapOf(
             "cloud_name" to BuildConfig.CLOUDINARY_CLOUD_NAME,
@@ -23,6 +23,10 @@ class CloudinaryModel {
             MediaManager.init(it, config)
             MediaManager.get().globalUploadPolicy = GlobalUploadPolicy.defaultPolicy()
         }
+    }
+
+    companion object {
+        val shared = CloudinaryModel()
     }
 
     fun uploadImage(

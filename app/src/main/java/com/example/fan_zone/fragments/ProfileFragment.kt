@@ -17,7 +17,7 @@ import com.example.fan_zone.AuthActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentProfileBinding
-import com.example.fan_zone.models.Model
+import com.example.fan_zone.models.CloudinaryModel
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.models.User
 import com.example.fan_zone.repositories.UserRepository
@@ -25,32 +25,32 @@ import com.example.fan_zone.viewModels.ProfileViewModel
 import com.squareup.picasso.Picasso
 
 class ProfileFragment : Fragment() {
-
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private var shouldUpdateProfilePicture = false
-    private lateinit var model: Model
     private val viewModel: ProfileViewModel by viewModels()
     private lateinit var postsAdapter: PostAdapter
     private var currentEditingPost: Post? = null
     private var editImageUri: Uri? = null
     private val userRepository = UserRepository()
 
-    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-        bitmap?.let {
-            binding.ivProfilePicture.setImageBitmap(it)
-            shouldUpdateProfilePicture = true
-        }
-    }
-
-    private val getContentForEdit = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            currentEditingPost?.let { post ->
-                editImageUri = it
-                postsAdapter.showImagePreview(post.id, uri)
+    private val cameraLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            bitmap?.let {
+                binding.ivProfilePicture.setImageBitmap(it)
+                shouldUpdateProfilePicture = true
             }
         }
-    }
+
+    private val getContentForEdit =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                currentEditingPost?.let { post ->
+                    editImageUri = it
+                    postsAdapter.showImagePreview(post.id, uri)
+                }
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,15 +63,10 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initialize()
         setupUI()
         setupRecyclerView()
         setupObservers()
         loadUserProfile()
-    }
-
-    private fun initialize() {
-        model = Model.shared
     }
 
     private fun setupUI() {
@@ -97,7 +92,7 @@ class ProfileFragment : Fragment() {
                 editImageUri = null
             },
             onDeletePost = { post -> viewModel.deletePost(post) },
-            onImageEditRequest = { post -> 
+            onImageEditRequest = { post ->
                 // If there's already a post being edited, cancel its edit mode first
                 currentEditingPost?.let { currentPost ->
                     if (currentPost.id != post.id) {
@@ -137,7 +132,7 @@ class ProfileFragment : Fragment() {
             navigateToAuth()
             return
         }
-        
+
         showLoading(true)
         viewModel.fetchUserPosts(userId)
 
@@ -210,10 +205,16 @@ class ProfileFragment : Fragment() {
     private fun uploadNewProfilePicture(userId: String) {
         val bitmap = (binding.ivProfilePicture.drawable as? BitmapDrawable)?.bitmap ?: return
 
-        model.uploadImageToCloudinary(
+        CloudinaryModel.shared.uploadImage(
             bitmap,
             "${userId}_profile_pic",
-            { imageUrl -> updateProfile(userId, binding.etFullName.text.toString().trim(), imageUrl) },
+            { imageUrl ->
+                updateProfile(
+                    userId,
+                    binding.etFullName.text.toString().trim(),
+                    imageUrl
+                )
+            },
             { error ->
                 Log.e("Cloudinary", "Upload error: ${error ?: "Unknown error"}")
                 showToast("Failed to upload new profile picture")
