@@ -17,6 +17,10 @@ class FirebaseModel private constructor() {
         return auth.currentUser
     }
 
+    fun getCurrentUserId(): String? {
+        return auth.currentUser?.uid
+    }
+
     suspend fun getUserById(userId: String): User? {
         return try {
             val document = db.collection("users")

@@ -5,13 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fan_zone.models.FirebaseModel
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.PostRepository
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
     private val postRepository = PostRepository()
+    private val firebaseModel = FirebaseModel.shared
     
     private val _userPosts = MutableLiveData<List<Post>>()
     val userPosts: LiveData<List<Post>> = _userPosts
@@ -26,12 +27,9 @@ class ProfileViewModel : ViewModel() {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                Log.d("ProfileViewModel", "Starting to fetch posts for user: $userId")
                 val posts = postRepository.getPostsByUserId(userId)
-                Log.d("ProfileViewModel", "Fetched ${posts.size} posts")
                 _userPosts.value = posts
             } catch (e: Exception) {
-                Log.e("ProfileViewModel", "Error fetching posts: ${e.message}")
                 _errorMessage.value = "Failed to load posts: ${e.message}"
             } finally {
                 _isLoading.value = false
@@ -42,12 +40,12 @@ class ProfileViewModel : ViewModel() {
     fun likePost(post: Post) {
         viewModelScope.launch {
             try {
-                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+                val currentUserId = firebaseModel.getCurrentUserId() ?: return@launch
                 val updatedLikes = post.likedUserIds.toMutableList()
                 if (!updatedLikes.contains(currentUserId)) {
                     updatedLikes.add(currentUserId)
                     postRepository.updatePost(post.id, post.content, post.imageUrl, updatedLikes)
-                    fetchUserPosts(currentUserId) // Refresh posts
+                    fetchUserPosts(currentUserId)
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to like post: ${e.message}"
@@ -58,12 +56,12 @@ class ProfileViewModel : ViewModel() {
     fun unlikePost(post: Post) {
         viewModelScope.launch {
             try {
-                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+                val currentUserId = firebaseModel.getCurrentUserId() ?: return@launch
                 val updatedLikes = post.likedUserIds.toMutableList()
                 if (updatedLikes.contains(currentUserId)) {
                     updatedLikes.remove(currentUserId)
                     postRepository.updatePost(post.id, post.content, post.imageUrl, updatedLikes)
-                    fetchUserPosts(currentUserId) // Refresh posts
+                    fetchUserPosts(currentUserId)
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to unlike post: ${e.message}"
@@ -75,8 +73,8 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 postRepository.updatePost(postId, content, imageUrl)
-                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
-                fetchUserPosts(currentUserId) // Refresh posts
+                val currentUserId = firebaseModel.getCurrentUserId() ?: return@launch
+                fetchUserPosts(currentUserId)
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to update post: ${e.message}"
             }
@@ -87,8 +85,8 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 postRepository.deletePost(post.id)
-                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
-                fetchUserPosts(currentUserId) // Refresh posts
+                val currentUserId = firebaseModel.getCurrentUserId() ?: return@launch
+                fetchUserPosts(currentUserId)
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to delete post: ${e.message}"
             }
