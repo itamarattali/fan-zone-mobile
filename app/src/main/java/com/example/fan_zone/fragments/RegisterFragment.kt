@@ -13,16 +13,14 @@ import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.MainActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentRegisterBinding
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.fan_zone.models.FirebaseModel
 
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firestore: FirebaseFirestore
+    private val firebaseModel: FirebaseModel = FirebaseModel.shared
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,10 +33,6 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize Firebase Auth
-        firebaseAuth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
-
         // Set click listener for the "Sign Up" button
         binding.btnSignUp.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
@@ -47,7 +41,30 @@ class RegisterFragment : Fragment() {
 
             // Validate inputs
             if (validateInput(fullName, email, password)) {
-                createUser(fullName, email, password)
+                updateIsLoading(true)
+                firebaseModel.createUser(
+                    fullName,
+                    email,
+                    password,
+                    onSuccess = {
+                        Toast.makeText(
+                            context,
+                            "Registration Successful",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        requireActivity().finish()
+                        startActivity(Intent(requireContext(), MainActivity::class.java))
+                        updateIsLoading(false)
+                    },
+                    onFailure = { errorMessage ->
+                        Toast.makeText(
+                            context,
+                            errorMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        updateIsLoading(false)
+                    }
+                )
             }
         }
 
@@ -86,51 +103,6 @@ class RegisterFragment : Fragment() {
 
             else -> true
         }
-    }
-
-    private fun createUser(fullName: String, email: String, password: String) {
-        updateIsLoading(true)
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    // Registration success
-                    val userId = firebaseAuth.currentUser?.uid
-                    if (userId != null) {
-                        // Save additional user data to Realtime Database
-                        val userMap = mapOf(
-                            "fullName" to fullName,
-                            "email" to email,
-                            "profilePicUrl" to ""
-                        )
-                        firestore.collection("users").document(userId).set(userMap)
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    context,
-                                    "Registration Successful",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                requireActivity().finish()
-                                startActivity(Intent(requireContext(), MainActivity::class.java))
-
-                                updateIsLoading(false)
-                            }
-                            .addOnFailureListener {
-                                Toast.makeText(
-                                    context,
-                                    "Failed to save user data",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                    }
-                } else {
-                    // Registration failure
-                    Toast.makeText(
-                        context,
-                        "Registration failed: ${task.exception?.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
     }
 
     private fun updateIsLoading(isLoading: Boolean) {

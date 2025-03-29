@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentPostDetailsBottomSheetBinding
 import com.example.fan_zone.models.Post
-import com.example.fan_zone.models.User
 import com.example.fan_zone.repositories.UserRepository
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.squareup.picasso.Picasso
@@ -48,7 +47,7 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
         // Only access the binding if it's non-null
         _binding?.let { binding ->
             CoroutineScope(Dispatchers.Main).launch {
-                val user = userRepository.getUserData(post.userId)
+                val user = userRepository.getUserById(post.userId)
 
                 binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
 

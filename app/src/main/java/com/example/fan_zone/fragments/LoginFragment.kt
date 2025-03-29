@@ -13,14 +13,14 @@ import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.MainActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentLoginBinding
-import com.google.firebase.auth.FirebaseAuth
+import com.example.fan_zone.models.FirebaseModel
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var firebaseAuth: FirebaseAuth
+    private val firebaseModel: FirebaseModel = FirebaseModel.shared
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,18 +33,29 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        firebaseAuth = FirebaseAuth.getInstance()
-
-        if (firebaseAuth.currentUser != null) {
-            findNavController().navigate(R.id.profileFragment)
-        }
-
         binding.btnSignIn.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
 
             if (validateInput(email, password)) {
-                loginUser(email, password)
+                updateIsLoading(true)
+                firebaseModel.loginUser(
+                    email,
+                    password,
+                    onSuccess = {
+                        updateIsLoading(false)
+                        requireActivity().finish()
+                        startActivity(Intent(requireContext(), MainActivity::class.java))
+                    },
+                    onFailure = { errorMessage ->
+                        updateIsLoading(false)
+                        Toast.makeText(
+                            context,
+                            errorMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
             }
         }
 
@@ -59,53 +70,24 @@ class LoginFragment : Fragment() {
                 binding.etEmail.error = "Email is required"
                 false
             }
+
             !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
                 binding.etEmail.error = "Invalid email address"
                 false
             }
+
             TextUtils.isEmpty(password) -> {
                 binding.etPassword.error = "Password is required"
                 false
             }
+
             else -> true
         }
     }
 
-    private fun loginUser(email: String, password: String) {
-        updateIsLoading(true)
-
-        var errorDisplayed = false
-
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    requireActivity().finish()
-                    startActivity(Intent(requireContext(), MainActivity::class.java))
-                } else {
-                    errorDisplayed = true
-                    Toast.makeText(
-                        context,
-                        "Invalid credentials, please try again",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                updateIsLoading(false)
-            }.addOnFailureListener(requireActivity()) { _ ->
-                if (!errorDisplayed){
-                    Toast.makeText(
-                        context,
-                        "Login failed",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                updateIsLoading(false)
-            }
-    }
-
     private fun updateIsLoading(isLoading: Boolean) {
-            binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
     override fun onDestroyView() {
