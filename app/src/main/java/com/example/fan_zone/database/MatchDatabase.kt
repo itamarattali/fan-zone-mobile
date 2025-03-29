@@ -24,7 +24,7 @@ abstract class MatchDatabase : RoomDatabase() {
                     context.applicationContext,
                     MatchDatabase::class.java,
                     "match_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }
