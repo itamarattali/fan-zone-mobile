@@ -37,7 +37,7 @@ class ProfileFragment : Fragment() {
     private val pickImageForProfile =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
-                binding.ivProfilePicture.setImageURI(it) // Display the selected image
+                binding.ivProfilePicture.setImageURI(it)
                 shouldUpdateProfilePicture = true
             }
         }
@@ -88,12 +88,11 @@ class ProfileFragment : Fragment() {
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { postId, content, imageUrl ->
                 viewModel.updatePost(postId, content, imageUrl)
-                currentEditingPost = null  // Reset editing state after successful edit
+                currentEditingPost = null
                 editImageUri = null
             },
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
-                // If there's already a post being edited, cancel its edit mode first
                 currentEditingPost?.let { currentPost ->
                     if (currentPost.id != post.id) {
                         postsAdapter.cancelEdit(currentPost.id)

@@ -86,7 +86,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private fun showPostDetails(post: Post) {
         val existingFragment = parentFragmentManager.findFragmentByTag("PostDetailsFragment")
 
-        // Only show the fragment if it's not already visible
         if (existingFragment == null) {
             val postDetailsFragment = PostDetailsBottomSheetFragment.newInstance(post)
             postDetailsFragment.show(parentFragmentManager, "PostDetailsFragment")
