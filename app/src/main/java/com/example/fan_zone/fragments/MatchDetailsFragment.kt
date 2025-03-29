@@ -299,9 +299,10 @@ class MatchDetailsFragment : Fragment() {
                     Toast.makeText(requireContext(), "Failed to get last known location", Toast.LENGTH_SHORT)
                         .show()
                 }
+        } else {
+            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
-
 
     private fun createPost(content: String, matchId: String, location: GeoPoint?) {
         if (content.isEmpty()) {
