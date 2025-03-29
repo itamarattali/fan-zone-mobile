@@ -207,9 +207,9 @@ class ProfileFragment : Fragment() {
         binding.apply {
             tvFullName.visibility = View.GONE
             btnEdit.visibility = View.GONE
+            btnSignOut.visibility = View.GONE
             tilFullName.visibility = View.VISIBLE
-            btnSave.visibility = View.VISIBLE
-            btnChangePicture.visibility = View.VISIBLE
+            editModeButtons.visibility = View.VISIBLE
         }
     }
 
@@ -229,9 +229,9 @@ class ProfileFragment : Fragment() {
         binding.apply {
             tvFullName.visibility = View.VISIBLE
             btnEdit.visibility = View.VISIBLE
+            btnSignOut.visibility = View.VISIBLE
             tilFullName.visibility = View.GONE
-            btnSave.visibility = View.GONE
-            btnChangePicture.visibility = View.GONE
+            editModeButtons.visibility = View.GONE
         }
     }
 
