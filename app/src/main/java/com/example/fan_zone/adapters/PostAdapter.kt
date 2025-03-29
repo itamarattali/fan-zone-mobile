@@ -30,6 +30,7 @@ class PostAdapter(
 
     private val posts = mutableListOf<Post>()
     private val userRepository = UserRepository()
+    private var recyclerView: RecyclerView? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun submitList(newPosts: List<Post>) {
@@ -72,6 +73,24 @@ class PostAdapter(
         if (position != -1) {
             notifyItemChanged(position, uri)
         }
+    }
+
+    fun cancelEdit(postId: String) {
+        val position = posts.indexOfFirst { it.id == postId }
+        if (position != -1) {
+            val holder = recyclerView?.findViewHolderForAdapterPosition(position) as? PostViewHolder
+            holder?.cancelEditMode()
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        this.recyclerView = null
     }
 
     class PostViewHolder(private val binding: PostRecyclerViewItemBinding) :
@@ -299,6 +318,30 @@ class PostAdapter(
                 if (isLiked) R.drawable.ic_like_filled else R.drawable.ic_like_unfilled
             )
             binding.likeCountTextView.text = "${post.likedUserIds.size} likes"
+        }
+
+        fun cancelEditMode() {
+            binding.apply {
+                contentTextView.visibility = View.VISIBLE
+                editPostContainer.visibility = View.GONE
+                editActionsContainer.visibility = View.GONE
+                submitEditButton.visibility = View.GONE
+                imageEditControls.visibility = View.GONE
+                editPostText.text = "Edit post"
+                
+                // Reset image to original state if needed
+                currentImageUrl?.let {
+                    postImageView.visibility = View.VISIBLE
+                    Picasso.get()
+                        .load(it)
+                        .rotate(0f)
+                        .fit()
+                        .centerInside()
+                        .into(postImageView)
+                } ?: run {
+                    postImageView.visibility = View.GONE
+                }
+            }
         }
     }
 }

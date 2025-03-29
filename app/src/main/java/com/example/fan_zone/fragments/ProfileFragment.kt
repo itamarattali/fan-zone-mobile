@@ -2,6 +2,7 @@ package com.example.fan_zone.fragments
 
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ import com.example.fan_zone.R
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
+import com.example.fan_zone.models.Post
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,11 +35,22 @@ class ProfileFragment : Fragment() {
     private lateinit var model: Model
     private val viewModel: ProfileViewModel by viewModels()
     private lateinit var postsAdapter: PostAdapter
+    private var currentEditingPost: Post? = null
+    private var editImageUri: Uri? = null
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         bitmap?.let {
             binding.ivProfilePicture.setImageBitmap(it)
             shouldUpdateProfilePicture = true
+        }
+    }
+
+    private val getContentForEdit = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            currentEditingPost?.let { post ->
+                editImageUri = it
+                postsAdapter.showImagePreview(post.id, uri)
+            }
         }
     }
 
@@ -80,13 +93,24 @@ class ProfileFragment : Fragment() {
 
     private fun setupRecyclerView() {
         postsAdapter = PostAdapter(
-            onLikeClicked = { post -> /* Implement like functionality */ },
-            onUnlikeClicked = { post -> /* Implement unlike functionality */ },
+            onLikeClicked = { post -> viewModel.likePost(post) },
+            onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { postId, content, imageUrl ->
-                /* Implement edit functionality */
+                viewModel.updatePost(postId, content, imageUrl)
+                currentEditingPost = null  // Reset editing state after successful edit
+                editImageUri = null
             },
-            onDeletePost = { post -> /* Implement delete functionality */ },
-            onImageEditRequest = { post -> /* Implement image edit functionality */ },
+            onDeletePost = { post -> viewModel.deletePost(post) },
+            onImageEditRequest = { post -> 
+                // If there's already a post being edited, cancel its edit mode first
+                currentEditingPost?.let { currentPost ->
+                    if (currentPost.id != post.id) {
+                        postsAdapter.cancelEdit(currentPost.id)
+                    }
+                }
+                currentEditingPost = post
+                getContentForEdit.launch("image/*")
+            },
             onLoadingStateChanged = { isLoading ->
                 viewModel.setLoading(isLoading)
             }
@@ -100,6 +124,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.userPosts.observe(viewLifecycleOwner) { posts ->
+            Log.d("ProfileFragment", "Received ${posts.size} posts")
             postsAdapter.submitList(posts)
         }
 
@@ -117,9 +142,24 @@ class ProfileFragment : Fragment() {
             navigateToAuth()
             return
         }
-
+        
+        Log.d("ProfileFragment", "Loading profile for user: $userId")
         showLoading(true)
         viewModel.fetchUserPosts(userId)
+
+        FirebaseFirestore.getInstance()
+            .collection("posts")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                Log.d("ProfileFragment", "Direct Firestore query found ${snapshot.documents.size} posts")
+                snapshot.documents.forEach { doc ->
+                    Log.d("ProfileFragment", "Post ID: ${doc.id}, Content: ${doc.getString("content")}")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("ProfileFragment", "Direct Firestore query failed: ${e.message}")
+            }
 
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
