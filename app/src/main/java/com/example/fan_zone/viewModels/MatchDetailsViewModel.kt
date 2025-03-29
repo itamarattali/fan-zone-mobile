@@ -115,7 +115,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun fetchMatchDetails(matchId: Int) {
-        _isLoading.value = true
+        _isLoading.postValue(true)
         _matchId.value = matchId
         fetchPosts(matchId)
     }
@@ -132,13 +132,13 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch posts"
             } finally {
-                _isLoading.value = false
+                _isLoading.postValue(false)
             }
         }
     }
 
     fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
+        _isLoading.postValue(isLoading)
     }
 
     private fun updatePostInLists(updatedPost: Post) {
