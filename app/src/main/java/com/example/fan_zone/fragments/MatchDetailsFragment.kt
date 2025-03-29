@@ -31,7 +31,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class MatchDetailsFragment : Fragment() {
     private var _binding: FragmentMatchDetailsBinding? = null
@@ -184,7 +186,8 @@ class MatchDetailsFragment : Fragment() {
             binding.scoreText.visibility = View.GONE
         }
 
-        binding.matchDetailsTextView.text = "Date: ${match.date}"
+        val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        binding.matchDateTextView.text = dateFormatter.format(match.date)
 
         if (match.homeTeamImage.isNotEmpty()) {
             Picasso.get()
