@@ -23,15 +23,12 @@ class ProfileViewModel : ViewModel() {
     val errorMessage: LiveData<String?> = _errorMessage
 
     fun fetchUserPosts(userId: String) {
-        _isLoading.value = true
         viewModelScope.launch {
             try {
                 val posts = postRepository.getPostsByUserId(userId)
                 _userPosts.value = posts
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to load posts: ${e.message}"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
