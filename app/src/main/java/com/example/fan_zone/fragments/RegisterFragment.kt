@@ -89,6 +89,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun createUser(fullName: String, email: String, password: String) {
+        updateIsLoading(true)
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
@@ -110,6 +111,8 @@ class RegisterFragment : Fragment() {
                                 ).show()
                                 requireActivity().finish()
                                 startActivity(Intent(requireContext(), MainActivity::class.java))
+
+                                updateIsLoading(false)
                             }
                             .addOnFailureListener {
                                 Toast.makeText(
@@ -128,6 +131,11 @@ class RegisterFragment : Fragment() {
                     ).show()
                 }
             }
+    }
+
+    private fun updateIsLoading(isLoading: Boolean) {
+        binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
     override fun onDestroyView() {
