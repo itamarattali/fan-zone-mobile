@@ -83,20 +83,6 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
         }
     }
 
-    fun loadImage(user: User?){
-        val profileImageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
-            user.profilePicUrl
-        } else {
-            null
-        }
-
-        Picasso.get()
-            .load(profileImageUrl)
-            .placeholder(R.drawable.ic_profile)
-            .error(R.drawable.ic_profile)
-            .into(binding.profileImageView)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
