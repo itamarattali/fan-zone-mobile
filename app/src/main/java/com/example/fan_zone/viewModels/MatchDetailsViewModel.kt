@@ -25,7 +25,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
     private val _matchId = MutableLiveData<Int>()
 
-    val match: LiveData<Match> = _matchId.switchMap{ id ->
+    val match: LiveData<Match> = _matchId.switchMap { id ->
         matchRepository.getMatchById(id)
     }
 
@@ -54,12 +54,17 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun updatePost(post: Post) {
+    fun updatePost(postId: String, content: String, imageUrl: String? = null) {
         viewModelScope.launch {
             _isLoading.postValue(true)
             try {
-                postRepository.updatePost(post.id, post.content)
-                val updatedUserPosts = _userPosts.value?.map { if (it.id == post.id) post.copy() else it } ?: emptyList()
+                postRepository.updatePost(postId, content, imageUrl)
+                val updatedUserPosts = _userPosts.value?.map {
+                    if (it.id == postId) it.copy(
+                        content = content,
+                        imageUrl = imageUrl
+                    ) else it
+                } ?: emptyList()
                 _userPosts.postValue(updatedUserPosts)
             } catch (e: Exception) {
                 _errorMessage.postValue("Failed to edit post")
@@ -115,7 +120,8 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
             _popularPosts.value =
-                posts.filter { it.userId != currentUserId }.sortedByDescending { it.likedUserIds.size }
+                posts.filter { it.userId != currentUserId }
+                    .sortedByDescending { it.likedUserIds.size }
             _userPosts.value = posts.filter { it.userId == currentUserId }
         }
     }

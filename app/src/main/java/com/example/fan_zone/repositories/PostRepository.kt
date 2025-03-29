@@ -28,11 +28,14 @@ class PostRepository {
         }
     }
 
-
-    suspend fun updatePost(postId: String, newContent: String) {
+    suspend fun updatePost(postId: String, content: String, imageUrl: String? = null) {
         try {
-            val postRef = postCollection.document(postId)
-            postRef.update("content", newContent).await()
+            val updates = mutableMapOf<String, Any?>(
+                "content" to content,
+                "imageUrl" to imageUrl
+            )
+
+            postCollection.document(postId).update(updates).await()
         } catch (e: Exception) {
             throw Exception("Error updating post: ${e.message}")
         }

@@ -2,7 +2,10 @@ package com.example.fan_zone.fragments
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.ImageDecoder
+import android.graphics.drawable.BitmapDrawable
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +24,7 @@ import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
 import com.example.fan_zone.models.GeoPoint
 import com.example.fan_zone.models.Match
+import com.example.fan_zone.models.Model
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -39,7 +43,39 @@ class MatchDetailsFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var popularPostsAdapter: PostAdapter
     private lateinit var userPostsAdapter: PostAdapter
+
+    private var selectedImageUri: Uri? = null
+    private var currentEditingPost: Post? = null
+    private var editImageUri: Uri? = null
     private var userLocation: GeoPoint? = null
+
+    private val getContentForNewPost =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                selectedImageUri = it
+                binding.postImagePreview.apply {
+                    visibility = View.VISIBLE
+                    val source = ImageDecoder.createSource(requireContext().contentResolver, uri)
+                    val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                        decoder.isMutableRequired = true
+                    }
+                    setImageBitmap(bitmap)
+                }
+            }
+        }
+
+    private val getContentForEdit =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                currentEditingPost?.let { post ->
+                    editImageUri = it
+                    val postAdapter =
+                        if (post.userId == getCurrentUser()) userPostsAdapter else popularPostsAdapter
+                    postAdapter.showImagePreview(post.id, uri)
+                }
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,9 +94,7 @@ class MatchDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fetchUserLocation { location ->
-            userLocation = location
-        }
+        setupUserLocation()
 
         binding.returnToFeed.setOnClickListener {
             val action =
@@ -72,6 +106,12 @@ class MatchDetailsFragment : Fragment() {
         setupRecyclerViews()
         observePostData()
         observeLoadingState()
+    }
+
+    private fun setupUserLocation() {
+        fetchUserLocation { location ->
+            userLocation = location
+        }
     }
 
     private fun setupMatchDetailsObserver() {
@@ -93,15 +133,33 @@ class MatchDetailsFragment : Fragment() {
         popularPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) },
-            onDeletePost = { post -> viewModel.deletePost(post) }
+            onEditPost = { postId, content, imageUrl ->
+                viewModel.updatePost(postId, content, imageUrl)
+            },
+            onDeletePost = { post -> viewModel.deletePost(post) },
+            onImageEditRequest = { post ->
+                currentEditingPost = post
+                getContentForEdit.launch("image/*")  // Use edit-specific picker
+            },
+            onLoadingStateChanged = { isLoading ->
+                viewModel.setLoading(isLoading)
+            }
         )
 
         userPostsAdapter = PostAdapter(
             onLikeClicked = { post -> viewModel.likePost(post) },
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
-            onEditPost = { post -> viewModel.updatePost(post) },
-            onDeletePost = { post -> viewModel.deletePost(post) }
+            onEditPost = { postId, content, imageUrl ->
+                viewModel.updatePost(postId, content, imageUrl)
+            },
+            onDeletePost = { post -> viewModel.deletePost(post) },
+            onImageEditRequest = { post ->
+                currentEditingPost = post
+                getContentForEdit.launch("image/*")  // Use edit-specific picker
+            },
+            onLoadingStateChanged = { isLoading ->
+                viewModel.setLoading(isLoading)
+            }
         )
     }
 
@@ -165,10 +223,7 @@ class MatchDetailsFragment : Fragment() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                fetchUserLocation { location ->
-                    val content = binding.postEditText.text.toString().trim()
-                    createPost(content, args.matchId, location)
-                }
+                setupUserLocation()
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -183,7 +238,6 @@ class MatchDetailsFragment : Fragment() {
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-
             fusedLocationClient.getCurrentLocation(
                 com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
                 null
@@ -207,6 +261,53 @@ class MatchDetailsFragment : Fragment() {
                 .show()
             return
         }
+
+        viewModel.setLoading(true)
+
+        // If there's a selected image, upload it first
+        if (binding.postImagePreview.visibility == View.VISIBLE) {
+            uploadPostImage(content, matchId, location)
+        } else {
+            createPostWithoutImage(content, matchId, location)
+        }
+    }
+
+    private fun uploadPostImage(content: String, matchId: String, location: GeoPoint?) {
+        val bitmap = (binding.postImagePreview.drawable as? BitmapDrawable)?.bitmap ?: run {
+            createPostWithoutImage(content, matchId, location)
+            return
+        }
+
+        Model.shared.uploadImageToCloudinary(
+            bitmap = bitmap,
+            name = "post_${System.currentTimeMillis()}",
+            onSuccess = { imageUrl ->
+                val newPost = Post(
+                    userId = getCurrentUser(),
+                    content = content,
+                    timePosted = Date(),
+                    matchId = matchId,
+                    location = location,
+                    imageUrl = imageUrl
+                )
+                viewModel.createPost(newPost)
+                clearPostForm()
+                viewModel.setLoading(false)
+            },
+            onError = { error ->
+                activity?.runOnUiThread {
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to upload image: $error",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    viewModel.setLoading(false)
+                }
+            }
+        )
+    }
+
+    private fun createPostWithoutImage(content: String, matchId: String, location: GeoPoint?) {
         val newPost = Post(
             userId = getCurrentUser(),
             content = content,
@@ -214,8 +315,20 @@ class MatchDetailsFragment : Fragment() {
             matchId = matchId,
             location = location
         )
-
         viewModel.createPost(newPost)
+        clearPostForm()
+        viewModel.setLoading(false)
+    }
+
+    private fun clearPostForm() {
+        binding.postEditText.text?.clear()
+        binding.postImagePreview.apply {
+            setImageBitmap(null)  // Clear the image
+            visibility = View.GONE
+        }
+        selectedImageUri = null
+        currentEditingPost = null  // Reset editing state
+        editImageUri = null       // Reset edit image
     }
 
     private fun setupClickListeners() {
@@ -232,6 +345,10 @@ class MatchDetailsFragment : Fragment() {
             }else{
                 Toast.makeText(context, "could not retrieve location", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        binding.selectImageButton.setOnClickListener {
+            getContentForNewPost.launch("image/*")  // Use new post picker
         }
     }
 
