@@ -81,6 +81,15 @@
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:textColor="@android:color/holo_red_light" />
+
+                <ImageView
+                    android:id="@+id/likeIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_like_filled"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="4dp" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

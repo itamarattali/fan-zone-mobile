@@ -23,7 +23,6 @@ class ProfileViewModel : ViewModel() {
     val errorMessage: LiveData<String?> = _errorMessage
 
     fun fetchUserPosts(userId: String) {
-        _isLoading.value = true
         viewModelScope.launch {
             try {
                 Log.d("ProfileViewModel", "Starting to fetch posts for user: $userId")
@@ -33,8 +32,6 @@ class ProfileViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Error fetching posts: ${e.message}")
                 _errorMessage.value = "Failed to load posts: ${e.message}"
-            } finally {
-                _isLoading.value = false
             }
         }
     }
