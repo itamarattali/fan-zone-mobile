@@ -152,6 +152,7 @@ class PostAdapter(
             fun toggleEditMode(isEditing: Boolean) {
                 binding.apply {
                     contentTextView.visibility = if (isEditing) View.GONE else View.VISIBLE
+                    likeIcon.visibility =  if (isEditing) View.GONE else View.VISIBLE
                     editPostContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
                     editActionsContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
                     submitEditButton.visibility = if (isEditing) View.VISIBLE else View.GONE
