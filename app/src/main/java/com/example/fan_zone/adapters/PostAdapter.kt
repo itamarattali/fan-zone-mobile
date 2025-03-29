@@ -110,24 +110,25 @@ class PostAdapter(
 
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-            // Fetch user data asynchronously using a coroutine
             CoroutineScope(Dispatchers.Main).launch {
                 val user = userRepository.getUserData(post.userId)
 
-                if (user != null) {
-                    binding.usernameTextView.text = user.fullName
-                    if (user.profilePicUrl != "") {
-                        Picasso.get()
-                            .load(user.profilePicUrl)
-                            .into(binding.profileImageView)
-                    }
+                binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
+
+                val imageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
+                    user.profilePicUrl
                 } else {
-                    binding.usernameTextView.text = "Unknown User"
-                    Picasso.get().load("default_image_url").into(binding.profileImageView)
+                    null
                 }
+
+                Picasso.get()
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(binding.profileImageView)
             }
 
-            // Show Edit/Delete options only for post author
+            // Show Edit Post link only for post author
             if (post.userId == userId) {
                 binding.editPostText.visibility = View.VISIBLE
                 binding.deletePostText.visibility = View.VISIBLE
@@ -157,7 +158,6 @@ class PostAdapter(
                 }
             }
 
-            // Handle edit mode
             binding.editPostText.setOnClickListener {
                 isImageRemoved = false
                 pendingImageUri = null
@@ -251,7 +251,6 @@ class PostAdapter(
                 onDeletePost(post)
             }
 
-            // Handle like/unlike
             updateLikeUI(post, userId)
             binding.likeIcon.setOnClickListener {
                 if (post.likedUserIds.contains(userId)) {

@@ -339,8 +339,11 @@ class MatchDetailsFragment : Fragment() {
             val content = binding.postEditText.text.toString().trim()
             val matchId = args.matchId
 
-            val location = userLocation
-            createPost(content, matchId, location)
+            if (userLocation != null) {
+                createPost(content, matchId, userLocation)
+            }else{
+                Toast.makeText(context, "could not retrieve location", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.selectImageButton.setOnClickListener {
