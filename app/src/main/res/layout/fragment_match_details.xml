@@ -39,20 +39,19 @@
                     android:padding="12dp"
                     android:gravity="center_horizontal">
 
-                    <!-- Logos & Names Centered -->
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center">
 
                         <!-- Home -->
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center"
-                            android:layout_marginEnd="32dp">
+                            android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/homeTeamImageView"
@@ -72,8 +71,9 @@
 
                         <!-- Away -->
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center">
 
@@ -125,7 +125,7 @@
                 android:id="@+id/postEditLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="6dp"
                 android:hint="Write your thoughts about the match..."
                 app:boxStrokeColor="@color/primary">
 
