@@ -19,24 +19,22 @@ import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
 import com.example.fan_zone.models.Post
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.squareup.picasso.Picasso
+import com.example.fan_zone.models.User
+import com.example.fan_zone.repositories.UserRepository
 import com.example.fan_zone.viewModels.ProfileViewModel
+import com.squareup.picasso.Picasso
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private var shouldUpdateProfilePicture = false
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firestore: FirebaseFirestore
     private lateinit var model: Model
     private val viewModel: ProfileViewModel by viewModels()
     private lateinit var postsAdapter: PostAdapter
     private var currentEditingPost: Post? = null
     private var editImageUri: Uri? = null
+    private val userRepository = UserRepository()
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         bitmap?.let {
@@ -73,8 +71,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun initialize() {
-        firebaseAuth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
         model = Model.shared
     }
 
@@ -82,7 +78,7 @@ class ProfileFragment : Fragment() {
         with(binding) {
             btnEdit.setOnClickListener { enterEditMode() }
             btnSave.setOnClickListener {
-                firebaseAuth.currentUser?.uid?.let { userId ->
+                userRepository.getCurrentUserId()?.let { userId ->
                     saveEditChanges(userId)
                 }
             }
@@ -137,7 +133,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserProfile() {
-        val userId = firebaseAuth.currentUser?.uid ?: run {
+        val userId = userRepository.getCurrentUserId() ?: run {
             navigateToAuth()
             return
         }
@@ -145,19 +141,14 @@ class ProfileFragment : Fragment() {
         showLoading(true)
         viewModel.fetchUserPosts(userId)
 
-        firestore.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                showLoading(false)
-                if (document.exists()) {
-                    updateUIWithUserData(document)
-                } else {
-                    showToast("User data not found")
-                }
+        userRepository.getUserById(userId) { user ->
+            showLoading(false)
+            if (user != null) {
+                updateUIWithUserData(user)
+            } else {
+                showToast("User data not found")
             }
-            .addOnFailureListener {
-                showToast("Failed to load profile")
-                showLoading(false)
-            }
+        }
     }
 
     private fun showLoading(isLoading: Boolean) {
@@ -167,17 +158,14 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun updateUIWithUserData(document: DocumentSnapshot) {
-        val fullName = document.getString("fullName")
-        val profilePicUrl = document.getString("profilePicUrl")
-
+    private fun updateUIWithUserData(user: User) {
         binding.apply {
-            tvFullName.text = fullName
-            etFullName.setText(fullName)
+            tvFullName.text = user.fullName
+            etFullName.setText(user.fullName)
 
-            if (!profilePicUrl.isNullOrEmpty()) {
+            if (!user.profilePicUrl.isNullOrEmpty()) {
                 Picasso.get()
-                    .load(profilePicUrl)
+                    .load(user.profilePicUrl)
                     .placeholder(R.drawable.default_pfp)
                     .error(R.drawable.default_pfp)
                     .into(ivProfilePicture)
@@ -238,17 +226,19 @@ class ProfileFragment : Fragment() {
         val userUpdates = mutableMapOf<String, Any>("fullName" to newFullName)
         newImageUrl?.let { userUpdates["profilePicUrl"] = it }
 
-        firestore.collection("users").document(userId)
-            .update(userUpdates)
-            .addOnSuccessListener {
+        userRepository.updateUserProfile(
+            userId,
+            userUpdates,
+            onSuccess = {
                 showToast("Profile updated")
                 shouldUpdateProfilePicture = false
                 loadUserProfile()
-            }
-            .addOnFailureListener {
+            },
+            onFailure = {
                 showToast("Failed to update profile")
                 showLoading(false)
             }
+        )
     }
 
     private fun pickImageFromGallery() {
@@ -256,7 +246,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun signOut() {
-        firebaseAuth.signOut()
+        userRepository.signOut()
         navigateToAuth()
     }
 

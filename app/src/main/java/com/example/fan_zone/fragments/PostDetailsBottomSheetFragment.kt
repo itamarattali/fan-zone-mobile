@@ -12,9 +12,6 @@ import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.UserRepository
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -44,11 +41,8 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Only access the binding if it's non-null
         _binding?.let { binding ->
-            CoroutineScope(Dispatchers.Main).launch {
-                val user = userRepository.getUserById(post.userId)
-
+            userRepository.getUserById(post.userId) { user ->
                 binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
 
                 val profileImageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
@@ -63,7 +57,7 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
                     .error(R.drawable.ic_profile)
                     .into(binding.profileImageView)
 
-                if (post != null && !post.imageUrl.isNullOrEmpty()) {
+                if (!post.imageUrl.isNullOrEmpty()) {
                     Picasso.get()
                         .load(post.imageUrl)
                         .into(binding.contentImage)
@@ -73,11 +67,11 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
 
                 binding.contentTextView.text = post.content
                 binding.likeCountTextView.text = post.likedUserIds.size.toString()
-                val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(post.timePosted)
+                val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    .format(post.timePosted)
                 binding.dateTextView.text = formattedDate
             }
         } ?: run {
-            // You can log or handle this scenario if needed
             Log.e("PostDetailsFragment", "Binding is null, skipping view setup.")
         }
     }

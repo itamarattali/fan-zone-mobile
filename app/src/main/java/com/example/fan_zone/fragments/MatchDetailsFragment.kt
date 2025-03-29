@@ -26,10 +26,10 @@ import com.example.fan_zone.models.GeoPoint
 import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Model
 import com.example.fan_zone.models.Post
+import com.example.fan_zone.repositories.UserRepository
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -40,7 +40,7 @@ class MatchDetailsFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: MatchDetailsViewModel by viewModels()
     private val args: MatchDetailsFragmentArgs by navArgs()
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private val userRepository = UserRepository()
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var popularPostsAdapter: PostAdapter
@@ -250,11 +250,8 @@ class MatchDetailsFragment : Fragment() {
     }
 
     private fun getCurrentUser(): String {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            return currentUser.uid
-        }
-        throw RuntimeException("Firebase currentUser is not defined!")
+        return userRepository.getCurrentUserId()
+            ?: throw RuntimeException("Firebase currentUser is not defined!")
     }
 
     private val requestPermissionLauncher =
@@ -379,7 +376,7 @@ class MatchDetailsFragment : Fragment() {
 
             if (userLocation != null) {
                 createPost(content, matchId, userLocation)
-            }else{
+            } else {
                 Toast.makeText(context, "could not retrieve location", Toast.LENGTH_SHORT).show()
             }
         }

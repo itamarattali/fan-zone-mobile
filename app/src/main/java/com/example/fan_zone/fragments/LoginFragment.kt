@@ -13,14 +13,13 @@ import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.MainActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentLoginBinding
-import com.example.fan_zone.models.FirebaseModel
+import com.example.fan_zone.repositories.UserRepository
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-
-    private val firebaseModel: FirebaseModel = FirebaseModel.shared
+    private val userRepository = UserRepository()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,24 +37,7 @@ class LoginFragment : Fragment() {
             val password = binding.etPassword.text.toString().trim()
 
             if (validateInput(email, password)) {
-                updateIsLoading(true)
-                firebaseModel.loginUser(
-                    email,
-                    password,
-                    onSuccess = {
-                        updateIsLoading(false)
-                        requireActivity().finish()
-                        startActivity(Intent(requireContext(), MainActivity::class.java))
-                    },
-                    onFailure = { errorMessage ->
-                        updateIsLoading(false)
-                        Toast.makeText(
-                            context,
-                            errorMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                )
+                performLogin(email, password)
             }
         }
 
@@ -83,6 +65,23 @@ class LoginFragment : Fragment() {
 
             else -> true
         }
+    }
+
+    private fun performLogin(email: String, password: String) {
+        updateIsLoading(true)
+        userRepository.loginUser(
+            email,
+            password,
+            onSuccess = {
+                updateIsLoading(false)
+                requireActivity().finish()
+                startActivity(Intent(requireContext(), MainActivity::class.java))
+            },
+            onFailure = { errorMessage ->
+                updateIsLoading(false)
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 
     private fun updateIsLoading(isLoading: Boolean) {

@@ -13,14 +13,13 @@ import androidx.navigation.fragment.findNavController
 import com.example.fan_zone.MainActivity
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentRegisterBinding
-import com.example.fan_zone.models.FirebaseModel
+import com.example.fan_zone.repositories.UserRepository
 
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-
-    private val firebaseModel: FirebaseModel = FirebaseModel.shared
+    private val userRepository = UserRepository()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,30 +40,7 @@ class RegisterFragment : Fragment() {
 
             // Validate inputs
             if (validateInput(fullName, email, password)) {
-                updateIsLoading(true)
-                firebaseModel.createUser(
-                    fullName,
-                    email,
-                    password,
-                    onSuccess = {
-                        Toast.makeText(
-                            context,
-                            "Registration Successful",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        requireActivity().finish()
-                        startActivity(Intent(requireContext(), MainActivity::class.java))
-                        updateIsLoading(false)
-                    },
-                    onFailure = { errorMessage ->
-                        Toast.makeText(
-                            context,
-                            errorMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        updateIsLoading(false)
-                    }
-                )
+                createUser(fullName, email, password)
             }
         }
 
@@ -103,6 +79,25 @@ class RegisterFragment : Fragment() {
 
             else -> true
         }
+    }
+
+    private fun createUser(fullName: String, email: String, password: String) {
+        updateIsLoading(true)
+        userRepository.createUser(
+            fullName,
+            email,
+            password,
+            onSuccess = {
+                Toast.makeText(context, "Registration Successful", Toast.LENGTH_SHORT).show()
+                requireActivity().finish()
+                startActivity(Intent(requireContext(), MainActivity::class.java))
+                updateIsLoading(false)
+            },
+            onFailure = { errorMessage ->
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                updateIsLoading(false)
+            }
+        )
     }
 
     private fun updateIsLoading(isLoading: Boolean) {

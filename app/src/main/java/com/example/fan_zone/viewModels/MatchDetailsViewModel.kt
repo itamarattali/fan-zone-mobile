@@ -6,11 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import com.example.fan_zone.models.FirebaseModel
 import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.MatchRepository
 import com.example.fan_zone.repositories.PostRepository
+import com.example.fan_zone.repositories.UserRepository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -19,7 +19,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
 
     private val matchRepository = MatchRepository(application)
     private val postRepository = PostRepository()
-    private val firebaseModel = FirebaseModel.shared
+    private val userRepository = UserRepository()
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
@@ -91,7 +91,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun likePost(post: Post) {
-        val userId = firebaseModel.getCurrentUserId() ?: return
+        val userId = userRepository.getCurrentUserId() ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update(
@@ -102,7 +102,7 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun unlikePost(post: Post) {
-        val userId = firebaseModel.getCurrentUserId() ?: return
+        val userId = userRepository.getCurrentUserId() ?: return
         val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
 
         postRef.update("likedUserIds", FieldValue.arrayRemove(userId))
@@ -118,11 +118,10 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     private fun fetchPosts(matchId: Int) {
         viewModelScope.launch {
             val posts = postRepository.getPostsByMatchID(matchId)
+            val currentUserId = userRepository.getCurrentUserId()
 
-            val currentUserId = firebaseModel.getCurrentUserId()
-            _popularPosts.value =
-                posts.filter { it.userId != currentUserId }
-                    .sortedByDescending { it.likedUserIds.size }
+            _popularPosts.value = posts.filter { it.userId != currentUserId }
+                .sortedByDescending { it.likedUserIds.size }
             _userPosts.value = posts.filter { it.userId == currentUserId }
         }
     }
