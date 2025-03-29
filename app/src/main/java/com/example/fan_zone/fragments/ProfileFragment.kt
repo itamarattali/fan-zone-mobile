@@ -124,7 +124,6 @@ class ProfileFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.userPosts.observe(viewLifecycleOwner) { posts ->
-            Log.d("ProfileFragment", "Received ${posts.size} posts")
             postsAdapter.submitList(posts)
         }
 
@@ -143,23 +142,8 @@ class ProfileFragment : Fragment() {
             return
         }
         
-        Log.d("ProfileFragment", "Loading profile for user: $userId")
         showLoading(true)
         viewModel.fetchUserPosts(userId)
-
-        FirebaseFirestore.getInstance()
-            .collection("posts")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                Log.d("ProfileFragment", "Direct Firestore query found ${snapshot.documents.size} posts")
-                snapshot.documents.forEach { doc ->
-                    Log.d("ProfileFragment", "Post ID: ${doc.id}, Content: ${doc.getString("content")}")
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("ProfileFragment", "Direct Firestore query failed: ${e.message}")
-            }
 
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
