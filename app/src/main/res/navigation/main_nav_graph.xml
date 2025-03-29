@@ -12,7 +12,17 @@
     <fragment
         android:id="@+id/matchesFeedFragment"
         android:name="com.example.fan_zone.fragments.MatchesFeedFragment"
-        android:label="Matches Feed" />
+        android:label="Matches Feed">
+        <action
+            android:id="@+id/action_matchesFeedFragment_to_matchDetailsFragment"
+            app:destination="@id/matchDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.fan_zone.fragments.MapFragment"
+        android:label="Map">
+    </fragment>
 
     <fragment
         android:id="@+id/matchDetailsFragment"
@@ -21,5 +31,8 @@
         <argument
             android:name="matchId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_matchDetailsFragment_to_matchesFeedFragment"
+            app:destination="@id/matchesFeedFragment" />
     </fragment>
 </navigation>

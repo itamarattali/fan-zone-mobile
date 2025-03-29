@@ -24,6 +24,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["googleApiKey"] = localProperties["google_api_key"] as String
     }
 
     buildTypes {
@@ -44,6 +46,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
         buildConfig = true
     }
 }
@@ -66,7 +69,22 @@ androidComponents {
                 "API Secret"
             )
         )
-
+        variant.buildConfigFields.put(
+            "GOOGLE_API_KEY",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["google_api_key"]}\"",
+                "Google Api Key"
+            )
+        )
+        variant.buildConfigFields.put(
+            "MATCHES_API_KEY",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["matches_api_key"]}\"",
+                "Matches API Key"
+            )
+        )
     }
 }
 
@@ -91,22 +109,24 @@ dependencies {
     implementation(libs.picasso)
     implementation(libs.cloudinary.cloudinary.android)
 
+    // Map
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+
     // Matches Api
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    implementation(libs.retrofit)
+    implementation(libs.converter.scalars)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
 
     // Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.6.1")
-
+    implementation(libs.androidx.room.ktx)
 
     // Location Provider
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation(libs.play.services.location)
 
     // Testing
     testImplementation(libs.junit)

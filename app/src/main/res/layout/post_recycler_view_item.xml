@@ -13,13 +13,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <!-- User Info Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingBottom="8dp"
             android:gravity="center_vertical">
 
             <com.google.android.material.imageview.ShapeableImageView
@@ -40,7 +41,6 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-        <!-- Post Content (Hidden when editing) -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/contentTextView"
             android:layout_width="wrap_content"
@@ -49,12 +49,20 @@
             android:layout_marginBottom="5dp"
             android:visibility="visible"/>
 
-        <!-- Edit Post Input (Replaces old content while editing) -->
+        <ImageView
+            android:id="@+id/postImageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editPostContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:padding="4dp"
             app:boxStrokeColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -67,28 +75,45 @@
                 android:textSize="14sp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Edit Action Buttons (Visible only in edit mode) -->
         <LinearLayout
             android:id="@+id/editActionsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:visibility="gone"
-            android:gravity="end"
-            android:layout_marginTop="5dp">
+            android:layout_marginTop="5dp"
+            android:paddingTop="4dp">
 
-            <!-- Cancel Edit Button (Only Shown During Editing) -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/cancelEditButton"
-                style="@style/Widget.MaterialComponents.Button.Icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:icon="@drawable/ic_cancel"
-                android:text=""
-                android:visibility="gone"
-                app:backgroundTint="@color/gray" />
+            <!-- Image Edit Controls Row -->
+            <LinearLayout
+                android:id="@+id/imageEditControls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:visibility="gone">
 
-            <!-- Submit Edit Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/changeImageButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Change Image"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/removeImageButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remove Image"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="12sp"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- Submit Button Row -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/submitEditButton"
                 android:layout_width="wrap_content"
@@ -96,11 +121,10 @@
                 android:text="Post"
                 android:textColor="@android:color/white"
                 android:backgroundTint="@color/primary"
-                android:visibility="gone"
-                android:layout_marginStart="8dp"/>
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
 
-        <!-- Like Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,7 +132,6 @@
             android:gravity="center_vertical"
             android:paddingTop="8dp">
 
-            <!-- Like Icon -->
             <ImageView
                 android:id="@+id/likeIcon"
                 android:layout_width="24dp"
@@ -127,13 +150,22 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- "Edit Post" Option (Only Shown for Post Owner) -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/editPostText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Edit Post"
             android:textColor="@color/blue"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginTop="5dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/deletePostText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete Post"
+            android:textColor="@android:color/holo_red_dark"
             android:textSize="12sp"
             android:visibility="gone"
             android:layout_marginTop="5dp" />
