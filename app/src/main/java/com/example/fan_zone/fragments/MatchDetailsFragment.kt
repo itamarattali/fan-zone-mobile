@@ -31,7 +31,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class MatchDetailsFragment : Fragment() {
     private var _binding: FragmentMatchDetailsBinding? = null
@@ -175,14 +177,17 @@ class MatchDetailsFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun updateMatchDetails(match: Match) {
-        binding.matchTitleTextView.text = "${match.homeTeam} vs ${match.awayTeam}"
+        binding.homeTeamNameText.text = match.homeTeam
+        binding.awayTeamNameText.text = match.awayTeam
+
         if (match.homeTeamGoals != null && match.awayTeamGoals != null) {
-            binding.matchResultTextView.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
+            binding.scoreText.text = "${match.homeTeamGoals} - ${match.awayTeamGoals}"
         } else {
-            binding.matchResultTextView.visibility = View.GONE
+            binding.scoreText.visibility = View.GONE
         }
 
-        binding.matchDetailsTextView.text = "Date: ${match.date}"
+        val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        binding.matchDateTextView.text = dateFormatter.format(match.date)
 
         if (match.homeTeamImage.isNotEmpty()) {
             Picasso.get()
@@ -191,9 +196,21 @@ class MatchDetailsFragment : Fragment() {
                 .error(R.drawable.ic_matches)
                 .fit()
                 .centerCrop()
-                .into(binding.matchImageView)
+                .into(binding.homeTeamImageView)
         } else {
-            binding.matchImageView.setImageResource(R.drawable.ic_matches)
+            binding.homeTeamImageView.setImageResource(R.drawable.ic_matches)
+        }
+
+        if (match.awayTeamImage.isNotEmpty()) {
+            Picasso.get()
+                .load(match.awayTeamImage)
+                .placeholder(R.drawable.ic_matches)
+                .error(R.drawable.ic_matches)
+                .fit()
+                .centerCrop()
+                .into(binding.awayTeamImageView)
+        } else {
+            binding.awayTeamImageView.setImageResource(R.drawable.ic_matches)
         }
     }
 
