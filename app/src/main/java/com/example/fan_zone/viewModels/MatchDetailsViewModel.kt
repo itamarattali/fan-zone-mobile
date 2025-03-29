@@ -115,18 +115,25 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun fetchMatchDetails(matchId: Int) {
+        _isLoading.value = true
         _matchId.value = matchId
         fetchPosts(matchId)
     }
 
     private fun fetchPosts(matchId: Int) {
         viewModelScope.launch {
-            val posts = postRepository.getPostsByMatchID(matchId)
-            val currentUserId = userRepository.getCurrentUserId()
-
-            _popularPosts.value = posts.filter { it.userId != currentUserId }
-                .sortedByDescending { it.likedUserIds.size }
-            _userPosts.value = posts.filter { it.userId == currentUserId }
+            try {
+                val posts = postRepository.getPostsByMatchID(matchId)
+                val currentUserId = userRepository.getCurrentUserId()
+                
+                _popularPosts.value = posts.filter { it.userId != currentUserId }
+                    .sortedByDescending { it.likedUserIds.size }
+                _userPosts.value = posts.filter { it.userId == currentUserId }
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to fetch posts"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
