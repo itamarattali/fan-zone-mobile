@@ -33,14 +33,12 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance()
 
         if (firebaseAuth.currentUser != null) {
-            findNavController().navigate(R.id.profileFragment) // Skip login/register
+            findNavController().navigate(R.id.profileFragment)
         }
 
-        // Set click listener for the "Sign In" button
         binding.btnSignIn.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
@@ -50,7 +48,6 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // Navigate to Register screen when "Sign Up" is clicked
         binding.tvSignUp.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
@@ -80,18 +77,23 @@ class LoginFragment : Fragment() {
         firebaseAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    // Login success
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                     requireActivity().finish()
                     startActivity(Intent(requireContext(), MainActivity::class.java))
                 } else {
-                    // Login failure
                     Toast.makeText(
                         context,
-                        "Login failed: ${task.exception?.message}",
+                        "Invalid credentials, please try again",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                updateIsLoading(false)
+            }.addOnFailureListener(requireActivity()) { _ ->
+                Toast.makeText(
+                    context,
+                    "Login failed",
+                    Toast.LENGTH_SHORT
+                ).show()
                 updateIsLoading(false)
             }
     }
