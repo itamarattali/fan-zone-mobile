@@ -22,14 +22,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.R
 import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentMatchDetailsBinding
+import com.example.fan_zone.models.CloudinaryModel
 import com.example.fan_zone.models.GeoPoint
 import com.example.fan_zone.models.Match
-import com.example.fan_zone.models.Model
 import com.example.fan_zone.models.Post
+import com.example.fan_zone.repositories.UserRepository
 import com.example.fan_zone.viewModels.MatchDetailsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -40,7 +40,7 @@ class MatchDetailsFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: MatchDetailsViewModel by viewModels()
     private val args: MatchDetailsFragmentArgs by navArgs()
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private val userRepository = UserRepository()
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var popularPostsAdapter: PostAdapter
@@ -250,11 +250,8 @@ class MatchDetailsFragment : Fragment() {
     }
 
     private fun getCurrentUser(): String {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            return currentUser.uid
-        }
-        throw RuntimeException("Firebase currentUser is not defined!")
+        return userRepository.getCurrentUserId()
+            ?: throw RuntimeException("Firebase currentUser is not defined!")
     }
 
     private val requestPermissionLauncher =
@@ -274,17 +271,32 @@ class MatchDetailsFragment : Fragment() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.getCurrentLocation(
-                com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-                null
-            )
-                .addOnSuccessListener { location: Location? ->
-                    val geoPoint = location?.let { GeoPoint(it.latitude, it.longitude) }
-                    onLocationRetrieved(geoPoint)
+        ){
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        // If we have the last known location, return it
+                        val geoPoint = GeoPoint(location.latitude, location.longitude)
+                        onLocationRetrieved(geoPoint)
+                    } else {
+                        // If last known location is unavailable, fetch the current location
+                        fusedLocationClient.getCurrentLocation(
+                            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null
+                        )
+                            .addOnSuccessListener { freshLocation ->
+                                val geoPoint = freshLocation?.let { GeoPoint(it.latitude, it.longitude) }
+                                onLocationRetrieved(geoPoint)
+                            }
+                            .addOnFailureListener {
+                                // Handle failure to get current location
+                                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                    }
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                    // Handle failure to get last known location
+                    Toast.makeText(requireContext(), "Failed to get last known location", Toast.LENGTH_SHORT)
                         .show()
                 }
         } else {
@@ -315,7 +327,7 @@ class MatchDetailsFragment : Fragment() {
             return
         }
 
-        Model.shared.uploadImageToCloudinary(
+        CloudinaryModel.shared.uploadImage(
             bitmap = bitmap,
             name = "post_${System.currentTimeMillis()}",
             onSuccess = { imageUrl ->
@@ -379,8 +391,8 @@ class MatchDetailsFragment : Fragment() {
 
             if (userLocation != null) {
                 createPost(content, matchId, userLocation)
-            }else{
-                Toast.makeText(context, "could not retrieve location", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "trying to retrieve location, make sure location permissions are turned on", Toast.LENGTH_LONG).show()
             }
         }
 

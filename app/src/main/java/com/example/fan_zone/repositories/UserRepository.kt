@@ -1,27 +1,48 @@
 package com.example.fan_zone.repositories
 
+import com.example.fan_zone.models.FirebaseModel
 import com.example.fan_zone.models.User
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
 class UserRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val usersCollection = db.collection("users")
+    private val firebaseModel = FirebaseModel.shared
 
-    suspend fun getUserData(userId: String): User? {
-        return try {
-            val document = usersCollection
-                .document(userId)
-                .get()
-                .await()  // Wait for the result asynchronously
+    fun getCurrentUserId(): String? {
+        return firebaseModel.getCurrentUserId()
+    }
 
-            if (document.exists()) {
-                document.toObject(User::class.java) // Return the user object
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        }
+    fun signOut() {
+        firebaseModel.signOutUser()
+    }
+
+    fun getUserById(userId: String, callback: (User?) -> Unit) {
+        firebaseModel.getUserById(userId, callback)
+    }
+
+    fun updateUserProfile(
+        userId: String,
+        updates: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        firebaseModel.updateUserProfile(userId, updates, onSuccess, onFailure)
+    }
+
+    fun loginUser(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        firebaseModel.loginUser(email, password, onSuccess, onFailure)
+    }
+
+    fun createUser(
+        fullName: String,
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        firebaseModel.createUser(fullName, email, password, onSuccess, onFailure)
     }
 }

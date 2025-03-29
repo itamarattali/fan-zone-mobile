@@ -10,14 +10,10 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.PostRecyclerViewItemBinding
-import com.example.fan_zone.models.Model
+import com.example.fan_zone.models.CloudinaryModel
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.UserRepository
-import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class PostAdapter(
     private val onLikeClicked: (Post) -> Unit,
@@ -118,7 +114,7 @@ class PostAdapter(
                 binding.postImageView.visibility = View.VISIBLE
                 Picasso.get()
                     .load(imageUrl)
-                    .rotate(0f)  // Add rotation handling
+                    .rotate(0f)
                     .fit()
                     .centerInside()
                     .into(binding.postImageView)
@@ -127,28 +123,25 @@ class PostAdapter(
                 currentImageUrl = null
             }
 
-            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+            val currentUserId = userRepository.getCurrentUserId()
 
-            CoroutineScope(Dispatchers.Main).launch {
-                val user = userRepository.getUserData(post.userId)
-
+            userRepository.getUserById(post.userId) { user ->
                 binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
 
-                val imageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
+                val profileImageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
                     user.profilePicUrl
                 } else {
                     null
                 }
 
                 Picasso.get()
-                    .load(imageUrl)
+                    .load(profileImageUrl)
                     .placeholder(R.drawable.ic_profile)
                     .error(R.drawable.ic_profile)
                     .into(binding.profileImageView)
             }
 
-            // Show Edit Post link only for post author
-            if (post.userId == userId) {
+            if (post.userId == currentUserId) {
                 binding.editPostText.visibility = View.VISIBLE
                 binding.deletePostText.visibility = View.VISIBLE
             } else {
@@ -159,6 +152,7 @@ class PostAdapter(
             fun toggleEditMode(isEditing: Boolean) {
                 binding.apply {
                     contentTextView.visibility = if (isEditing) View.GONE else View.VISIBLE
+                    likeIcon.visibility =  if (isEditing) View.GONE else View.VISIBLE
                     editPostContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
                     editActionsContainer.visibility = if (isEditing) View.VISIBLE else View.GONE
                     submitEditButton.visibility = if (isEditing) View.VISIBLE else View.GONE
@@ -234,7 +228,7 @@ class PostAdapter(
                             decoder.isMutableRequired = true
                         }
 
-                        Model.shared.uploadImageToCloudinary(
+                        CloudinaryModel.shared.uploadImage(
                             bitmap = bitmap,
                             name = "post_${System.currentTimeMillis()}",
                             onSuccess = { imageUrl ->
@@ -285,12 +279,14 @@ class PostAdapter(
                 onDeletePost(post)
             }
 
-            updateLikeUI(post, userId)
-            binding.likeIcon.setOnClickListener {
-                if (post.likedUserIds.contains(userId)) {
-                    onUnlikeClicked(post)
-                } else {
-                    onLikeClicked(post)
+            currentUserId?.let { userId ->
+                updateLikeUI(post, userId)
+                binding.likeIcon.setOnClickListener {
+                    if (post.likedUserIds.contains(userId)) {
+                        onUnlikeClicked(post)
+                    } else {
+                        onLikeClicked(post)
+                    }
                 }
             }
         }
@@ -312,8 +308,8 @@ class PostAdapter(
         }
 
         @SuppressLint("SetTextI18n")
-        private fun updateLikeUI(post: Post, userId: String?) {
-            val isLiked = userId != null && post.likedUserIds.contains(userId)
+        private fun updateLikeUI(post: Post, userId: String) {
+            val isLiked = post.likedUserIds.contains(userId)
             binding.likeIcon.setImageResource(
                 if (isLiked) R.drawable.ic_like_filled else R.drawable.ic_like_unfilled
             )
@@ -328,7 +324,7 @@ class PostAdapter(
                 submitEditButton.visibility = View.GONE
                 imageEditControls.visibility = View.GONE
                 editPostText.text = "Edit post"
-                
+
                 // Reset image to original state if needed
                 currentImageUrl?.let {
                     postImageView.visibility = View.VISIBLE
