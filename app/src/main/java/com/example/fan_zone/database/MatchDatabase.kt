@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.example.fan_zone.database.converters.DateConverter
 import com.example.fan_zone.models.Match
 
-@Database(entities = [Match::class], version = 2, exportSchema = false)
+@Database(entities = [Match::class], version = 1, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class MatchDatabase : RoomDatabase() {
 
