@@ -10,14 +10,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fan_zone.AuthActivity
 import com.example.fan_zone.R
+import com.example.fan_zone.adapters.PostAdapter
 import com.example.fan_zone.databinding.FragmentProfileBinding
 import com.example.fan_zone.models.Model
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
+import com.example.fan_zone.viewModels.ProfileViewModel
 
 class ProfileFragment : Fragment() {
 
@@ -27,6 +31,8 @@ class ProfileFragment : Fragment() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var model: Model
+    private val viewModel: ProfileViewModel by viewModels()
+    private lateinit var postsAdapter: PostAdapter
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         bitmap?.let {
@@ -48,6 +54,8 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initialize()
         setupUI()
+        setupRecyclerView()
+        setupObservers()
         loadUserProfile()
     }
 
@@ -70,6 +78,40 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun setupRecyclerView() {
+        postsAdapter = PostAdapter(
+            onLikeClicked = { post -> /* Implement like functionality */ },
+            onUnlikeClicked = { post -> /* Implement unlike functionality */ },
+            onEditPost = { postId, content, imageUrl ->
+                /* Implement edit functionality */
+            },
+            onDeletePost = { post -> /* Implement delete functionality */ },
+            onImageEditRequest = { post -> /* Implement image edit functionality */ },
+            onLoadingStateChanged = { isLoading ->
+                viewModel.setLoading(isLoading)
+            }
+        )
+
+        binding.recyclerViewPosts.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = postsAdapter
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.userPosts.observe(viewLifecycleOwner) { posts ->
+            postsAdapter.submitList(posts)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            showLoading(isLoading)
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMsg ->
+            errorMsg?.let { showToast(it) }
+        }
+    }
+
     private fun loadUserProfile() {
         val userId = firebaseAuth.currentUser?.uid ?: run {
             navigateToAuth()
@@ -77,6 +119,7 @@ class ProfileFragment : Fragment() {
         }
 
         showLoading(true)
+        viewModel.fetchUserPosts(userId)
 
         firestore.collection("users").document(userId).get()
             .addOnSuccessListener { document ->

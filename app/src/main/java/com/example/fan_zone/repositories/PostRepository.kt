@@ -54,4 +54,18 @@ class PostRepository {
             emptyList()
         }
     }
+
+    suspend fun getPostsByUserId(userId: String): List<Post> {
+        return try {
+            val snapshot = postCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("timePosted", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            snapshot.toObjects(Post::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }
