@@ -33,7 +33,6 @@ class MatchRepository(context: Context) {
     private fun fetchMatches() {
         val apiService = RetrofitClient.instance
 
-
         val (startDate, endDate) = getDatesToFetch()
         apiService.getMatches(startDate, endDate)
             .enqueue(object : Callback<String> {

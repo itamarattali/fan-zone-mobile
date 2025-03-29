@@ -24,6 +24,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["googleApiKey"] = localProperties["google_api_key"] as String
     }
 
     buildTypes {
@@ -73,6 +75,14 @@ androidComponents {
                 "String",
                 "\"${localProperties["google_api_key"]}\"",
                 "Google Api Key"
+            )
+        )
+        variant.buildConfigFields.put(
+            "MATCHES_API_KEY",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["matches_api_key"]}\"",
+                "Matches API Key"
             )
         )
     }
