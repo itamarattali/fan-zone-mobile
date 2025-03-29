@@ -147,15 +147,13 @@ class MatchDetailsFragment : Fragment() {
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { postId, content, imageUrl ->
                 viewModel.updatePost(postId, content, imageUrl)
-                currentEditingPost = null  // Reset editing state after successful edit
+                currentEditingPost = null
                 editImageUri = null
             },
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
-                // If there's already a post being edited, cancel its edit mode first
                 currentEditingPost?.let { currentPost ->
                     if (currentPost.id != post.id) {
-                        // Cancel edit in both adapters to ensure no other post is in edit mode
                         popularPostsAdapter.cancelEdit(currentPost.id)
                         userPostsAdapter.cancelEdit(currentPost.id)
                     }
@@ -173,15 +171,13 @@ class MatchDetailsFragment : Fragment() {
             onUnlikeClicked = { post -> viewModel.unlikePost(post) },
             onEditPost = { postId, content, imageUrl ->
                 viewModel.updatePost(postId, content, imageUrl)
-                currentEditingPost = null  // Reset editing state after successful edit
+                currentEditingPost = null
                 editImageUri = null
             },
             onDeletePost = { post -> viewModel.deletePost(post) },
             onImageEditRequest = { post ->
-                // If there's already a post being edited, cancel its edit mode first
                 currentEditingPost?.let { currentPost ->
                     if (currentPost.id != post.id) {
-                        // Cancel edit in both adapters to ensure no other post is in edit mode
                         popularPostsAdapter.cancelEdit(currentPost.id)
                         userPostsAdapter.cancelEdit(currentPost.id)
                     }
@@ -286,11 +282,9 @@ class MatchDetailsFragment : Fragment() {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
-                        // If we have the last known location, return it
                         val geoPoint = GeoPoint(location.latitude, location.longitude)
                         onLocationRetrieved(geoPoint)
                     } else {
-                        // If last known location is unavailable, fetch the current location
                         fusedLocationClient.getCurrentLocation(
                             com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null
                         )
@@ -300,7 +294,6 @@ class MatchDetailsFragment : Fragment() {
                                 onLocationRetrieved(geoPoint)
                             }
                             .addOnFailureListener {
-                                // Handle failure to get current location
                                 Toast.makeText(
                                     requireContext(),
                                     "Failed to get location",
@@ -311,7 +304,6 @@ class MatchDetailsFragment : Fragment() {
                     }
                 }
                 .addOnFailureListener {
-                    // Handle failure to get last known location
                     Toast.makeText(
                         requireContext(),
                         "Failed to get last known location",
@@ -333,7 +325,6 @@ class MatchDetailsFragment : Fragment() {
 
         viewModel.setLoading(true)
 
-        // If there's a selected image, upload it first
         if (binding.postImagePreview.visibility == View.VISIBLE) {
             uploadPostImage(content, matchId, location)
         } else {
@@ -392,12 +383,12 @@ class MatchDetailsFragment : Fragment() {
     private fun clearPostForm() {
         binding.postEditText.text?.clear()
         binding.postImagePreview.apply {
-            setImageBitmap(null)  // Clear the image
+            setImageBitmap(null)
             visibility = View.GONE
         }
         selectedImageUri = null
-        currentEditingPost = null  // Reset editing state
-        editImageUri = null       // Reset edit image
+        currentEditingPost = null
+        editImageUri = null
     }
 
     private fun setupClickListeners() {
@@ -421,7 +412,7 @@ class MatchDetailsFragment : Fragment() {
         }
 
         binding.selectImageButton.setOnClickListener {
-            getContentForNewPost.launch("image/*")  // Use new post picker
+            getContentForNewPost.launch("image/*")
         }
     }
 

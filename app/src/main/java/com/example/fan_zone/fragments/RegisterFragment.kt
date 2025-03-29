@@ -32,19 +32,16 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set click listener for the "Sign Up" button
         binding.btnSignUp.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
 
-            // Validate inputs
             if (validateInput(fullName, email, password)) {
                 createUser(fullName, email, password)
             }
         }
 
-        // Navigate to Login screen when "Sign In" is clicked
         binding.tvSignIn.setOnClickListener {
             findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
