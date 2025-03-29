@@ -64,20 +64,19 @@ class PostAdapter(
             CoroutineScope(Dispatchers.Main).launch {
                 val user = userRepository.getUserData(post.userId)
 
-                if (user != null) {
-                    // Update the UI with the fetched user data
-                    binding.usernameTextView.text = user.fullName
-                    if (user.profilePicUrl != ""){
-                        Picasso.get()
-                            .load(user.profilePicUrl)
-                            .into(binding.profileImageView)
-                    }
+                binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
 
+                val imageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
+                    user.profilePicUrl
                 } else {
-                    // Handle case where user is not found
-                    binding.usernameTextView.text = "Unknown User"
-                    Picasso.get().load("default_image_url").into(binding.profileImageView)
+                    null
                 }
+
+                Picasso.get()
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(binding.profileImageView)
             }
 
             // Show Edit Post link only for post author

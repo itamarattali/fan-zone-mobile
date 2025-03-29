@@ -49,16 +49,19 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
             CoroutineScope(Dispatchers.Main).launch {
                 val user = userRepository.getUserData(post.userId)
 
-                if (user != null) {
-                    binding.usernameTextView.text = user.fullName
-                    Picasso.get().load(user.profilePicUrl)
-                        .placeholder(R.drawable.ic_matches)
-                        .error(R.drawable.ic_matches)
-                        .fit()
-                        .centerCrop().into(binding.profileImageView)
+                binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
+
+                val imageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
+                    user.profilePicUrl
                 } else {
-                    binding.usernameTextView.text = "unknown user"
+                    null
                 }
+
+                Picasso.get()
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .into(binding.profileImageView)
 
                 binding.contentTextView.text = post.content
                 binding.likeCountTextView.text = post.likedUserIds.size.toString()
