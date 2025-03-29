@@ -271,23 +271,37 @@ class MatchDetailsFragment : Fragment() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.getCurrentLocation(
-                com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-                null
-            )
-                .addOnSuccessListener { location: Location? ->
-                    val geoPoint = location?.let { GeoPoint(it.latitude, it.longitude) }
-                    onLocationRetrieved(geoPoint)
+        ){
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        // If we have the last known location, return it
+                        val geoPoint = GeoPoint(location.latitude, location.longitude)
+                        onLocationRetrieved(geoPoint)
+                    } else {
+                        // If last known location is unavailable, fetch the current location
+                        fusedLocationClient.getCurrentLocation(
+                            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null
+                        )
+                            .addOnSuccessListener { freshLocation ->
+                                val geoPoint = freshLocation?.let { GeoPoint(it.latitude, it.longitude) }
+                                onLocationRetrieved(geoPoint)
+                            }
+                            .addOnFailureListener {
+                                // Handle failure to get current location
+                                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                    }
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                    // Handle failure to get last known location
+                    Toast.makeText(requireContext(), "Failed to get last known location", Toast.LENGTH_SHORT)
                         .show()
                 }
-        } else {
-            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
+
 
     private fun createPost(content: String, matchId: String, location: GeoPoint?) {
         if (content.isEmpty()) {
