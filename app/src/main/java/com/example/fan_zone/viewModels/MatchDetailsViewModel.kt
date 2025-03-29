@@ -10,15 +10,14 @@ import com.example.fan_zone.models.Match
 import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.MatchRepository
 import com.example.fan_zone.repositories.PostRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.fan_zone.repositories.UserRepository
 import kotlinx.coroutines.launch
 
 class MatchDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val matchRepository = MatchRepository(application)
     private val postRepository = PostRepository()
+    private val userRepository = UserRepository()
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
@@ -90,44 +89,56 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun likePost(post: Post) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
-
-        postRef.update(
-            "likedUserIds", FieldValue.arrayUnion(userId),
-        )
-
-        updatePostInLists(post.copy(likedUserIds = post.likedUserIds + userId))
+        viewModelScope.launch {
+            try {
+                val userId = userRepository.getCurrentUserId() ?: return@launch
+                val updatedLikes = post.likedUserIds + userId
+                postRepository.updatePostLikes(post.id, updatedLikes)
+                updatePostInLists(post.copy(likedUserIds = updatedLikes))
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to like post"
+            }
+        }
     }
 
     fun unlikePost(post: Post) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
-
-        postRef.update("likedUserIds", FieldValue.arrayRemove(userId))
-
-        updatePostInLists(post.copy(likedUserIds = post.likedUserIds.filter { it != userId }))
+        viewModelScope.launch {
+            try {
+                val userId = userRepository.getCurrentUserId() ?: return@launch
+                val updatedLikes = post.likedUserIds.filter { it != userId }
+                postRepository.updatePostLikes(post.id, updatedLikes)
+                updatePostInLists(post.copy(likedUserIds = updatedLikes))
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to unlike post"
+            }
+        }
     }
 
     fun fetchMatchDetails(matchId: Int) {
+        _isLoading.postValue(true)
         _matchId.value = matchId
         fetchPosts(matchId)
     }
 
     private fun fetchPosts(matchId: Int) {
         viewModelScope.launch {
-            val posts = postRepository.getPostsByMatchID(matchId)
-
-            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-            _popularPosts.value =
-                posts.filter { it.userId != currentUserId }
+            try {
+                val posts = postRepository.getPostsByMatchID(matchId)
+                val currentUserId = userRepository.getCurrentUserId()
+                
+                _popularPosts.value = posts.filter { it.userId != currentUserId }
                     .sortedByDescending { it.likedUserIds.size }
-            _userPosts.value = posts.filter { it.userId == currentUserId }
+                _userPosts.value = posts.filter { it.userId == currentUserId }
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to fetch posts"
+            } finally {
+                _isLoading.postValue(false)
+            }
         }
     }
 
     fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
+        _isLoading.postValue(isLoading)
     }
 
     private fun updatePostInLists(updatedPost: Post) {

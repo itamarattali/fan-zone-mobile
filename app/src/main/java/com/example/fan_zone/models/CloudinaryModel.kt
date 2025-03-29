@@ -5,22 +5,28 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.cloudinary.android.policy.GlobalUploadPolicy
-import com.example.fan_zone.FanZoneApp
+import com.example.fan_zone.base.Constants
+import com.example.fan_zone.base.FanZoneApp
 import com.example.fan_zone.utils.extensions.toFile
+import com.example.fan_zone.BuildConfig
 import java.io.File
 
-class CloudinaryModel {
+class CloudinaryModel private constructor() {
     init {
         val config = mapOf(
-            "cloud_name" to "dcvscarx8",
-            "api_key" to com.example.fan_zone.BuildConfig.CLOUDINARY_API_KEY,
-            "api_secret" to com.example.fan_zone.BuildConfig.CLOUDINARY_API_SECRET
+            "cloud_name" to BuildConfig.CLOUDINARY_CLOUD_NAME,
+            "api_key" to BuildConfig.CLOUDINARY_API_KEY,
+            "api_secret" to BuildConfig.CLOUDINARY_API_SECRET
         )
 
         FanZoneApp.Globals.context?.let {
             MediaManager.init(it, config)
             MediaManager.get().globalUploadPolicy = GlobalUploadPolicy.defaultPolicy()
         }
+    }
+
+    companion object {
+        val shared = CloudinaryModel()
     }
 
     fun uploadImage(
@@ -33,7 +39,7 @@ class CloudinaryModel {
         val file: File = bitmap.toFile(context, name)
 
         MediaManager.get().upload(file.path)
-            .option("folder", "images")
+            .option("folder", Constants.CloudinaryFolders.IMAGES)
             .callback(object  : UploadCallback {
                 override fun onStart(requestId: String?) {
 

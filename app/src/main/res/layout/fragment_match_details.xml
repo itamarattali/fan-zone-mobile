@@ -1,215 +1,222 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.core.widget.NestedScrollView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:padding="16dp">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:padding="16dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/returnToFeed"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:backgroundTint="@android:color/darker_gray"
-                android:padding="8dp"
-                app:icon="@android:drawable/ic_menu_revert" />
-
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="@color/white">
+                android:orientation="vertical">
 
-                <LinearLayout
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/returnToFeed"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:backgroundTint="@android:color/darker_gray"
+                    android:padding="8dp"
+                    app:icon="@android:drawable/ic_menu_revert" />
+
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp"
-                    android:gravity="center_horizontal">
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center">
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                        <!-- Home -->
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
-                            <ImageView
-                                android:id="@+id/homeTeamImageView"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:scaleType="centerCrop"
-                                android:contentDescription="Home Team" />
-
-                            <TextView
-                                android:id="@+id/homeTeamNameText"
-                                android:layout_width="wrap_content"
+                            <!-- Home -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="Home"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp" />
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <ImageView
+                                    android:id="@+id/homeTeamImageView"
+                                    android:layout_width="48dp"
+                                    android:layout_height="48dp"
+                                    android:contentDescription="Home Team"
+                                    android:scaleType="centerCrop" />
+
+                                <TextView
+                                    android:id="@+id/homeTeamNameText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Home"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <!-- Away -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <ImageView
+                                    android:id="@+id/awayTeamImageView"
+                                    android:layout_width="48dp"
+                                    android:layout_height="48dp"
+                                    android:contentDescription="Away Team"
+                                    android:scaleType="centerCrop" />
+
+                                <TextView
+                                    android:id="@+id/awayTeamNameText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Away"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Away -->
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <!-- Score Centered -->
+                        <TextView
+                            android:id="@+id/scoreText"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:id="@+id/awayTeamImageView"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:scaleType="centerCrop"
-                                android:contentDescription="Away Team" />
-
-                            <TextView
-                                android:id="@+id/awayTeamNameText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Away"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp" />
-                        </LinearLayout>
+                            android:layout_marginTop="8dp"
+                            android:text="2 - 1"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Score Centered -->
-                    <TextView
-                        android:id="@+id/scoreText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="2 - 1"
-                        android:textStyle="bold"
-                        android:textSize="20sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/matchDateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:text="15/09/2024 21:45"
+                    android:textStyle="italic" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/matchDateTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:text="15/09/2024 21:45"
-                android:textStyle="italic" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/matchDetailsTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/postEditLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:hint="Write your thoughts about the match..."
-                app:boxStrokeColor="@color/primary">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/postEditText"
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/matchDetailsTextView"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:gravity="top"
-                    android:inputType="textMultiLine"
-                    android:padding="10dp"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" />
 
-            <ImageView
-                android:id="@+id/postImagePreview"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="8dp"
-                android:scaleType="centerCrop"
-                android:visibility="gone" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/postEditLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:hint="Write your thoughts about the match..."
+                    app:boxStrokeColor="@color/primary">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/selectImageButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Add Image" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/postEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:gravity="top"
+                        android:inputType="textMultiLine"
+                        android:padding="10dp"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/postButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:enabled="false"
-                android:text="Post"
-                android:textColor="@android:color/white" />
+                <ImageView
+                    android:id="@+id/postImagePreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="8dp"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/yourPostsTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Your Posts"
-                android:textStyle="bold" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/selectImageButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Add Image" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewYourPosts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/post_recycler_view_item" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/postButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:enabled="false"
+                    android:text="Post"
+                    android:textColor="@android:color/white" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/popularPostsTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Popular Posts"
-                android:textStyle="bold" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/yourPostsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Your Posts"
+                    android:textStyle="bold" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewPopularPosts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/post_recycler_view_item" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewYourPosts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/post_recycler_view_item" />
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/popularPostsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Popular Posts"
+                    android:textStyle="bold" />
 
-    <View
-        android:id="@+id/loadingOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#80000000"
-        android:visibility="gone"
-        android:clickable="true" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewPopularPosts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/post_recycler_view_item" />
 
-    <ProgressBar
-        android:id="@+id/loadingSpinner"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
-</FrameLayout>
+        <View
+            android:id="@+id/loadingOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000"
+            android:clickable="true"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -58,7 +58,7 @@ androidComponents {
             com.android.build.api.variant.BuildConfigField(
                 "String",
                 "\"${localProperties["cloudinary_api_key"]}\"",
-                "API Key"
+                "Cloudinary API Key"
             )
         )
         variant.buildConfigFields.put(
@@ -66,7 +66,15 @@ androidComponents {
             com.android.build.api.variant.BuildConfigField(
                 "String",
                 "\"${localProperties["cloudinary_api_secret"]}\"",
-                "API Secret"
+                "Cloudinary API Secret"
+            )
+        )
+        variant.buildConfigFields.put(
+            "CLOUDINARY_CLOUD_NAME",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["cloudinary_cloud_name"]}\"",
+                "Cloudinary Cloud Name"
             )
         )
         variant.buildConfigFields.put(
@@ -110,7 +118,7 @@ dependencies {
     implementation(libs.cloudinary.cloudinary.android)
 
     // Map
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation(libs.play.services.maps)
 
     // Matches Api
     implementation(libs.retrofit)
@@ -120,6 +128,7 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.okhttp)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.swiperefreshlayout)
     kapt(libs.androidx.room.compiler)
 
     // Coroutines support for Room
