@@ -94,9 +94,7 @@ class MatchDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fetchUserLocation { location ->
-            userLocation = location
-        }
+        setupUserLocation()
 
         binding.returnToFeed.setOnClickListener {
             val action =
@@ -108,6 +106,12 @@ class MatchDetailsFragment : Fragment() {
         setupRecyclerViews()
         observePostData()
         observeLoadingState()
+    }
+
+    private fun setupUserLocation() {
+        fetchUserLocation { location ->
+            userLocation = location
+        }
     }
 
     private fun setupMatchDetailsObserver() {
@@ -233,10 +237,7 @@ class MatchDetailsFragment : Fragment() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                fetchUserLocation { location ->
-                    val content = binding.postEditText.text.toString().trim()
-                    createPost(content, args.matchId, location)
-                }
+                setupUserLocation()
             } else {
                 Toast.makeText(
                     requireContext(),
