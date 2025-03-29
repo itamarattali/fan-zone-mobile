@@ -39,51 +39,62 @@
                     android:padding="12dp"
                     android:gravity="center_horizontal">
 
+                    <!-- Logos & Names Centered -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center">
 
-                        <ImageView
-                            android:id="@+id/homeTeamImageView"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:scaleType="centerCrop"
-                            android:layout_marginEnd="32dp"
-                            android:contentDescription="Home Team" />
-
-                        <ImageView
-                            android:id="@+id/awayTeamImageView"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="Away Team" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/homeTeamNameText"
+                        <!-- Home -->
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Home"
-                            android:textStyle="bold"
-                            android:layout_marginEnd="32dp" />
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:layout_marginEnd="32dp">
 
-                        <TextView
-                            android:id="@+id/awayTeamNameText"
+                            <ImageView
+                                android:id="@+id/homeTeamImageView"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="Home Team" />
+
+                            <TextView
+                                android:id="@+id/homeTeamNameText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Home"
+                                android:textStyle="bold"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+
+                        <!-- Away -->
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Away"
-                            android:textStyle="bold" />
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/awayTeamImageView"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="Away Team" />
+
+                            <TextView
+                                android:id="@+id/awayTeamNameText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Away"
+                                android:textStyle="bold"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
                     </LinearLayout>
 
+                    <!-- Score Centered -->
                     <TextView
                         android:id="@+id/scoreText"
                         android:layout_width="wrap_content"
