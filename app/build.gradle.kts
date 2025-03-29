@@ -118,7 +118,7 @@ dependencies {
     implementation(libs.cloudinary.cloudinary.android)
 
     // Map
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation(libs.play.services.maps)
 
     // Matches Api
     implementation(libs.retrofit)
