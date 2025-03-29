@@ -58,7 +58,7 @@ androidComponents {
             com.android.build.api.variant.BuildConfigField(
                 "String",
                 "\"${localProperties["cloudinary_api_key"]}\"",
-                "API Key"
+                "Cloudinary API Key"
             )
         )
         variant.buildConfigFields.put(
@@ -66,7 +66,15 @@ androidComponents {
             com.android.build.api.variant.BuildConfigField(
                 "String",
                 "\"${localProperties["cloudinary_api_secret"]}\"",
-                "API Secret"
+                "Cloudinary API Secret"
+            )
+        )
+        variant.buildConfigFields.put(
+            "CLOUDINARY_CLOUD_NAME",
+            com.android.build.api.variant.BuildConfigField(
+                "String",
+                "\"${localProperties["cloudinary_cloud_name"]}\"",
+                "Cloudinary Cloud Name"
             )
         )
         variant.buildConfigFields.put(

@@ -9,4 +9,8 @@ object Constants {
     object CloudinaryFolders {
         const val IMAGES = "images"
     }
+
+    object ApiBaseUrl {
+        const val MATCHES = "https://api.football-data.org/v4/"
+    }
 }

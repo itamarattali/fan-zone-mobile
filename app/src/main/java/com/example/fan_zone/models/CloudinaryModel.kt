@@ -8,14 +8,15 @@ import com.cloudinary.android.policy.GlobalUploadPolicy
 import com.example.fan_zone.base.Constants
 import com.example.fan_zone.base.FanZoneApp
 import com.example.fan_zone.utils.extensions.toFile
+import com.example.fan_zone.BuildConfig
 import java.io.File
 
 class CloudinaryModel {
     init {
         val config = mapOf(
-            "cloud_name" to "dcvscarx8",
-            "api_key" to com.example.fan_zone.BuildConfig.CLOUDINARY_API_KEY,
-            "api_secret" to com.example.fan_zone.BuildConfig.CLOUDINARY_API_SECRET
+            "cloud_name" to BuildConfig.CLOUDINARY_CLOUD_NAME,
+            "api_key" to BuildConfig.CLOUDINARY_API_KEY,
+            "api_secret" to BuildConfig.CLOUDINARY_API_SECRET
         )
 
         FanZoneApp.Globals.context?.let {
