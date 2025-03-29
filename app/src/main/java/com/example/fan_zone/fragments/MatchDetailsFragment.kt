@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -96,6 +95,7 @@ class MatchDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupSwipeRefresh()
         setupUserLocation()
 
         binding.returnToFeed.setOnClickListener {
@@ -108,6 +108,16 @@ class MatchDetailsFragment : Fragment() {
         setupRecyclerViews()
         observePostData()
         observeLoadingState()
+    }
+
+    private fun setupSwipeRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            refreshData()
+        }
+    }
+
+    private fun refreshData() {
+        viewModel.fetchMatchDetails(args.matchId.toInt())
     }
 
     private fun setupUserLocation() {
@@ -246,6 +256,7 @@ class MatchDetailsFragment : Fragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
             binding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.swipeRefreshLayout.isRefreshing = false
         }
     }
 
@@ -271,7 +282,7 @@ class MatchDetailsFragment : Fragment() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        ){
+        ) {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
@@ -284,19 +295,28 @@ class MatchDetailsFragment : Fragment() {
                             com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null
                         )
                             .addOnSuccessListener { freshLocation ->
-                                val geoPoint = freshLocation?.let { GeoPoint(it.latitude, it.longitude) }
+                                val geoPoint =
+                                    freshLocation?.let { GeoPoint(it.latitude, it.longitude) }
                                 onLocationRetrieved(geoPoint)
                             }
                             .addOnFailureListener {
                                 // Handle failure to get current location
-                                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to get location",
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
                     }
                 }
                 .addOnFailureListener {
                     // Handle failure to get last known location
-                    Toast.makeText(requireContext(), "Failed to get last known location", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to get last known location",
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
         } else {
@@ -392,7 +412,11 @@ class MatchDetailsFragment : Fragment() {
             if (userLocation != null) {
                 createPost(content, matchId, userLocation)
             } else {
-                Toast.makeText(context, "trying to retrieve location, make sure location permissions are turned on", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    "trying to retrieve location, make sure location permissions are turned on",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
