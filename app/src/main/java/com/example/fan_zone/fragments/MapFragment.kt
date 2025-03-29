@@ -6,20 +6,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentMapBinding
 import com.example.fan_zone.models.Post
+import com.example.fan_zone.repositories.PostRepository
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 class MapFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
-    private val firebase = FirebaseFirestore.getInstance()
+    private val postRepository = PostRepository()
     private lateinit var googleMap: GoogleMap
 
     override fun onCreateView(
@@ -60,21 +62,24 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun loadPostsOnMap() {
-        firebase.collection("posts").get()
-            .addOnSuccessListener { snapshot ->
-                snapshot.documents.mapNotNull { it.toObject(Post::class.java) }
-                    .forEach { post ->
-                        if (post.location != null) {
-                            val location = LatLng(post.location!!.latitude, post.location!!.longitude)
-                            val marker = googleMap.addMarker(
-                                MarkerOptions()
-                                    .position(location)
-                                    .title(post.content.take(20) + "...")
-                            )
-                            marker?.tag = post
-                        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val posts = postRepository.getAllPosts()
+                posts.forEach { post ->
+                    if (post.location != null) {
+                        val location = LatLng(post.location!!.latitude, post.location!!.longitude)
+                        val marker = googleMap.addMarker(
+                            MarkerOptions()
+                                .position(location)
+                                .title(post.content.take(20) + "...")
+                        )
+                        marker?.tag = post
                     }
+                }
+            } catch (e: Exception) {
+                // Handle error if needed
             }
+        }
     }
 
     private fun showPostDetails(post: Post) {
@@ -86,7 +91,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             postDetailsFragment.show(parentFragmentManager, "PostDetailsFragment")
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

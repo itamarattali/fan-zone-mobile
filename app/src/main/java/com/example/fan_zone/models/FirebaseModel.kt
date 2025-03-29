@@ -1,8 +1,9 @@
 package com.example.fan_zone.models
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.tasks.await
 
 class FirebaseModel private constructor() {
     private val auth = FirebaseAuth.getInstance()
@@ -87,5 +88,97 @@ class FirebaseModel private constructor() {
             .update(updates)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure() }
+    }
+
+    suspend fun createPost(post: Post): Post {
+        return try {
+            val postId = db.collection("posts").document().id
+            val newPost = post.copy(id = postId)
+            db.collection("posts").document(postId).set(newPost).await()
+            newPost
+        } catch (e: Exception) {
+            throw Exception("Error creating post: ${e.message}")
+        }
+    }
+
+    suspend fun deletePost(postId: String) {
+        try {
+            db.collection("posts").document(postId).delete().await()
+        } catch (e: Exception) {
+            throw Exception("Error deleting post: ${e.message}")
+        }
+    }
+
+    suspend fun updatePost(
+        postId: String,
+        content: String,
+        imageUrl: String?,
+        likedUserIds: List<String>? = null
+    ) {
+        try {
+            val updates = mutableMapOf<String, Any?>(
+                "content" to content,
+                "imageUrl" to imageUrl
+            )
+
+            if (likedUserIds != null) {
+                updates["likedUserIds"] = likedUserIds
+            }
+
+            db.collection("posts").document(postId).update(updates).await()
+        } catch (e: Exception) {
+            throw Exception("Error updating post: ${e.message}")
+        }
+    }
+
+    suspend fun getPostsByMatchId(matchId: Int): List<Post> {
+        return try {
+            val snapshot = db.collection("posts")
+                .whereEqualTo("matchId", matchId.toString())
+                .orderBy("timePosted", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            snapshot.toObjects(Post::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun getPostsByUserId(userId: String): List<Post> {
+        return try {
+            val snapshot = db.collection("posts")
+                .whereEqualTo("userId", userId)
+                .orderBy("timePosted", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            snapshot.toObjects(Post::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun updatePostLikes(postId: String, likedUserIds: List<String>) {
+        try {
+            db.collection("posts").document(postId)
+                .update("likedUserIds", likedUserIds)
+                .await()
+        } catch (e: Exception) {
+            throw Exception("Error updating post likes: ${e.message}")
+        }
+    }
+
+    suspend fun getAllPosts(): List<Post> {
+        return try {
+            val snapshot = db.collection("posts")
+                .orderBy("timePosted", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            snapshot.toObjects(Post::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }

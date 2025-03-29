@@ -11,8 +11,6 @@ import com.example.fan_zone.models.Post
 import com.example.fan_zone.repositories.MatchRepository
 import com.example.fan_zone.repositories.PostRepository
 import com.example.fan_zone.repositories.UserRepository
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 class MatchDetailsViewModel(application: Application) : AndroidViewModel(application) {
@@ -91,23 +89,29 @@ class MatchDetailsViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun likePost(post: Post) {
-        val userId = userRepository.getCurrentUserId() ?: return
-        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
-
-        postRef.update(
-            "likedUserIds", FieldValue.arrayUnion(userId),
-        )
-
-        updatePostInLists(post.copy(likedUserIds = post.likedUserIds + userId))
+        viewModelScope.launch {
+            try {
+                val userId = userRepository.getCurrentUserId() ?: return@launch
+                val updatedLikes = post.likedUserIds + userId
+                postRepository.updatePostLikes(post.id, updatedLikes)
+                updatePostInLists(post.copy(likedUserIds = updatedLikes))
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to like post"
+            }
+        }
     }
 
     fun unlikePost(post: Post) {
-        val userId = userRepository.getCurrentUserId() ?: return
-        val postRef = FirebaseFirestore.getInstance().collection("posts").document(post.id)
-
-        postRef.update("likedUserIds", FieldValue.arrayRemove(userId))
-
-        updatePostInLists(post.copy(likedUserIds = post.likedUserIds.filter { it != userId }))
+        viewModelScope.launch {
+            try {
+                val userId = userRepository.getCurrentUserId() ?: return@launch
+                val updatedLikes = post.likedUserIds.filter { it != userId }
+                postRepository.updatePostLikes(post.id, updatedLikes)
+                updatePostInLists(post.copy(likedUserIds = updatedLikes))
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to unlike post"
+            }
+        }
     }
 
     fun fetchMatchDetails(matchId: Int) {
