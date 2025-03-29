@@ -52,7 +52,7 @@ class PostAdapter(
             onEditPost,
             onDeletePost,
             onImageEditRequest,
-            onLoadingStateChanged,  // Add this parameter
+            onLoadingStateChanged,
             userRepository
         )
     }
@@ -88,7 +88,7 @@ class PostAdapter(
             onEditPost: (String, String, String?) -> Unit,
             onDeletePost: (Post) -> Unit,
             onImageEditRequest: (Post) -> Unit,
-            onLoadingStateChanged: (Boolean) -> Unit,  // Add this parameter
+            onLoadingStateChanged: (Boolean) -> Unit,
             userRepository: UserRepository
         ) {
             binding.contentTextView.text = post.content
@@ -150,19 +150,44 @@ class PostAdapter(
                         if (currentImageUrl != null || pendingImageUri != null) View.VISIBLE else View.GONE
                     editPostText.text = if (isEditing) "cancel edit" else "Edit post"
 
-                    // Show preview if there's a pending image
-                    pendingImageUri?.let { uri ->
-                        postImageView.visibility = View.VISIBLE
-                        Picasso.get().load(uri).into(postImageView)
+                    if (!isEditing) {
+                        // Reset image state when canceling edit
+                        pendingImageUri = null
+                        isImageRemoved = false
+
+                        // Restore original image if it exists
+                        if (currentImageUrl != null) {
+                            postImageView.visibility = View.VISIBLE
+                            Picasso.get()
+                                .load(currentImageUrl)
+                                .rotate(0f)
+                                .fit()
+                                .centerInside()
+                                .into(postImageView)
+                        } else {
+                            postImageView.visibility = View.GONE
+                        }
+                    } else {
+                        // Show preview if there's a pending image
+                        pendingImageUri?.let { uri ->
+                            postImageView.visibility = View.VISIBLE
+                            Picasso.get().load(uri).into(postImageView)
+                        }
                     }
                 }
             }
 
             binding.editPostText.setOnClickListener {
-                isImageRemoved = false
-                pendingImageUri = null
-                binding.editPostEditText.setText(post.content)
-                toggleEditMode(true)
+                if (binding.editPostText.text == "cancel edit") {
+                    // Cancel edit
+                    toggleEditMode(false)
+                } else {
+                    // Start edit
+                    isImageRemoved = false
+                    pendingImageUri = null
+                    binding.editPostEditText.setText(post.content)
+                    toggleEditMode(true)
+                }
             }
 
             binding.changeImageButton.setOnClickListener {
@@ -174,7 +199,6 @@ class PostAdapter(
                 binding.postImageView.visibility = View.GONE
                 binding.imageEditControls.visibility = View.VISIBLE
                 binding.removeImageButton.visibility = View.GONE
-                currentImageUrl = null
             }
 
             binding.submitEditButton.setOnClickListener {
@@ -198,33 +222,21 @@ class PostAdapter(
                                 // Update the post first
                                 onEditPost(post.id, updatedContent, imageUrl)
                                 binding.contentTextView.text = updatedContent
+                                currentImageUrl = imageUrl  // Update current image URL
 
                                 // Then load the image with a callback
                                 binding.postImageView.visibility = View.VISIBLE
                                 Picasso.get()
                                     .load(imageUrl)
                                     .rotate(0f)
-                                    .fit()
-                                    .centerInside()
-                                    .into(
-                                        binding.postImageView,
-                                        object : com.squareup.picasso.Callback {
-                                            override fun onSuccess() {
-                                                toggleEditMode(false)
-                                                isImageRemoved = false
-                                                pendingImageUri = null
-                                                onLoadingStateChanged(false)
-                                            }
+                                    .noFade()
+                                    .into(binding.postImageView)
 
-                                            override fun onError(e: Exception?) {
-                                                onLoadingStateChanged(false)
-                                                Toast.makeText(
-                                                    binding.root.context,
-                                                    "Failed to load image: ${e?.message}",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                        })
+                                // Toggle edit mode off immediately after updating content
+                                toggleEditMode(false)
+                                isImageRemoved = false
+                                pendingImageUri = null
+                                onLoadingStateChanged(false)
                             },
                             onError = { error ->
                                 onLoadingStateChanged(false)
@@ -240,6 +252,9 @@ class PostAdapter(
                         val finalImageUrl = if (isImageRemoved) null else currentImageUrl
                         onEditPost(post.id, updatedContent, finalImageUrl)
                         binding.contentTextView.text = updatedContent
+                        if (isImageRemoved) {
+                            currentImageUrl = null  // Update current image URL if removed
+                        }
                         toggleEditMode(false)
                         isImageRemoved = false
                         pendingImageUri = null
