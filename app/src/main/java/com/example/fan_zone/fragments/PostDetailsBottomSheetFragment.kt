@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.example.fan_zone.R
 import com.example.fan_zone.databinding.FragmentPostDetailsBottomSheetBinding
 import com.example.fan_zone.models.Post
+import com.example.fan_zone.models.User
 import com.example.fan_zone.repositories.UserRepository
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.squareup.picasso.Picasso
@@ -51,17 +52,25 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
 
                 binding.usernameTextView.text = if (user != null) user.fullName else "Unknown User"
 
-                val imageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
+                val profileImageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
                     user.profilePicUrl
                 } else {
                     null
                 }
 
                 Picasso.get()
-                    .load(imageUrl)
+                    .load(profileImageUrl)
                     .placeholder(R.drawable.ic_profile)
                     .error(R.drawable.ic_profile)
                     .into(binding.profileImageView)
+
+                if (post != null && !post.imageUrl.isNullOrEmpty()) {
+                    Picasso.get()
+                        .load(post.imageUrl)
+                        .into(binding.contentImage)
+                } else {
+                    binding.contentImage.visibility = View.GONE
+                }
 
                 binding.contentTextView.text = post.content
                 binding.likeCountTextView.text = post.likedUserIds.size.toString()
@@ -72,6 +81,20 @@ class PostDetailsBottomSheetFragment : BottomSheetDialogFragment() {
             // You can log or handle this scenario if needed
             Log.e("PostDetailsFragment", "Binding is null, skipping view setup.")
         }
+    }
+
+    fun loadImage(user: User?){
+        val profileImageUrl = if (user != null && !user.profilePicUrl.isNullOrEmpty()) {
+            user.profilePicUrl
+        } else {
+            null
+        }
+
+        Picasso.get()
+            .load(profileImageUrl)
+            .placeholder(R.drawable.ic_profile)
+            .error(R.drawable.ic_profile)
+            .into(binding.profileImageView)
     }
 
     override fun onDestroyView() {
