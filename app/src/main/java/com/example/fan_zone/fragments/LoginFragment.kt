@@ -74,6 +74,8 @@ class LoginFragment : Fragment() {
     private fun loginUser(email: String, password: String) {
         updateIsLoading(true)
 
+        var errorDisplayed = false
+
         firebaseAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
@@ -81,6 +83,7 @@ class LoginFragment : Fragment() {
                     requireActivity().finish()
                     startActivity(Intent(requireContext(), MainActivity::class.java))
                 } else {
+                    errorDisplayed = true
                     Toast.makeText(
                         context,
                         "Invalid credentials, please try again",
@@ -89,11 +92,13 @@ class LoginFragment : Fragment() {
                 }
                 updateIsLoading(false)
             }.addOnFailureListener(requireActivity()) { _ ->
-                Toast.makeText(
-                    context,
-                    "Login failed",
-                    Toast.LENGTH_SHORT
-                ).show()
+                if (!errorDisplayed){
+                    Toast.makeText(
+                        context,
+                        "Login failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 updateIsLoading(false)
             }
     }
