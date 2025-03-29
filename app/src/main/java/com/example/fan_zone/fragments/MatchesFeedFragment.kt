@@ -65,14 +65,15 @@ class MatchesFeedFragment : Fragment() {
         val selectedDateText = binding.selectedDateText
 
         val calendar = Calendar.getInstance()
+        val dateRange = 14
 
-        calendar.add(Calendar.DAY_OF_YEAR, -3)
+        calendar.add(Calendar.DAY_OF_YEAR, -dateRange)
 
         var todayButton: Button? = null
         var isTodayCentered = false
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-        for (i in -7..7) {
+        for (i in -dateRange..dateRange) {
             val button = Button(requireContext()).apply {
                 val date = calendar.time
                 val dayOfWeek = android.text.format.DateFormat.format("EEE", date).toString()
