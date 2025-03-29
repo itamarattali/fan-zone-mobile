@@ -1,5 +1,6 @@
 package com.example.fan_zone.models
 
+import com.example.fan_zone.base.Constants
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -8,6 +9,9 @@ import kotlinx.coroutines.tasks.await
 class FirebaseModel private constructor() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+
+    private val USERS_COLLECTION = Constants.FirebaseCollections.USERS
+    private val POSTS_COLLECTION = Constants.FirebaseCollections.POSTS
 
     companion object {
         val shared = FirebaseModel()
@@ -18,7 +22,7 @@ class FirebaseModel private constructor() {
     }
 
     fun getUserById(userId: String, callback: (User?) -> Unit) {
-        db.collection("users").document(userId).get()
+        db.collection(USERS_COLLECTION).document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     callback(document.toObject(User::class.java))
@@ -52,7 +56,7 @@ class FirebaseModel private constructor() {
                             "email" to email,
                             "profilePicUrl" to ""
                         )
-                        db.collection("users").document(userId).set(userMap)
+                        db.collection(USERS_COLLECTION).document(userId).set(userMap)
                             .addOnSuccessListener { onSuccess() }
                             .addOnFailureListener { onFailure("Failed to save user data") }
                     }
@@ -84,7 +88,7 @@ class FirebaseModel private constructor() {
         onSuccess: () -> Unit,
         onFailure: () -> Unit
     ) {
-        db.collection("users").document(userId)
+        db.collection(USERS_COLLECTION).document(userId)
             .update(updates)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onFailure() }
@@ -92,9 +96,9 @@ class FirebaseModel private constructor() {
 
     suspend fun createPost(post: Post): Post {
         return try {
-            val postId = db.collection("posts").document().id
+            val postId = db.collection(POSTS_COLLECTION).document().id
             val newPost = post.copy(id = postId)
-            db.collection("posts").document(postId).set(newPost).await()
+            db.collection(POSTS_COLLECTION).document(postId).set(newPost).await()
             newPost
         } catch (e: Exception) {
             throw Exception("Error creating post: ${e.message}")
@@ -103,7 +107,7 @@ class FirebaseModel private constructor() {
 
     suspend fun deletePost(postId: String) {
         try {
-            db.collection("posts").document(postId).delete().await()
+            db.collection(POSTS_COLLECTION).document(postId).delete().await()
         } catch (e: Exception) {
             throw Exception("Error deleting post: ${e.message}")
         }
@@ -125,7 +129,7 @@ class FirebaseModel private constructor() {
                 updates["likedUserIds"] = likedUserIds
             }
 
-            db.collection("posts").document(postId).update(updates).await()
+            db.collection(POSTS_COLLECTION).document(postId).update(updates).await()
         } catch (e: Exception) {
             throw Exception("Error updating post: ${e.message}")
         }
@@ -133,7 +137,7 @@ class FirebaseModel private constructor() {
 
     suspend fun getPostsByMatchId(matchId: Int): List<Post> {
         return try {
-            val snapshot = db.collection("posts")
+            val snapshot = db.collection(POSTS_COLLECTION)
                 .whereEqualTo("matchId", matchId.toString())
                 .orderBy("timePosted", Query.Direction.DESCENDING)
                 .get()
@@ -147,7 +151,7 @@ class FirebaseModel private constructor() {
 
     suspend fun getPostsByUserId(userId: String): List<Post> {
         return try {
-            val snapshot = db.collection("posts")
+            val snapshot = db.collection(POSTS_COLLECTION)
                 .whereEqualTo("userId", userId)
                 .orderBy("timePosted", Query.Direction.DESCENDING)
                 .get()
@@ -161,7 +165,7 @@ class FirebaseModel private constructor() {
 
     suspend fun updatePostLikes(postId: String, likedUserIds: List<String>) {
         try {
-            db.collection("posts").document(postId)
+            db.collection(POSTS_COLLECTION).document(postId)
                 .update("likedUserIds", likedUserIds)
                 .await()
         } catch (e: Exception) {
@@ -171,7 +175,7 @@ class FirebaseModel private constructor() {
 
     suspend fun getAllPosts(): List<Post> {
         return try {
-            val snapshot = db.collection("posts")
+            val snapshot = db.collection(POSTS_COLLECTION)
                 .orderBy("timePosted", Query.Direction.DESCENDING)
                 .get()
                 .await()
